@@ -1,5 +1,6 @@
-import requests
+import os
 import re
+import requests
 import sys
 
 WORKER_URL = os.getenv("WORKER_URL")  # örn: https://macyayin.umittv.workers.dev
