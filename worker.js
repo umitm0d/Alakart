@@ -1,5 +1,4 @@
-// worker.js
-const BASE_URL = "https://alakart.pages.dev/checklist/";
+const BASE_URL = "https://example.workers.dev/checklist/";
 
 addEventListener("fetch", event => {
   event.respondWith(handleRequest(event.request));
