@@ -35,7 +35,6 @@ async function handleRequest(request) {
     try {
       const res = await fetch(playlist);
       let text = await res.text();
-      // Playlist içindeki URL’leri proxy formatına çevir
       text = text.replace(/(https:\/\/[^ \n]+)/g, (m) => `/proxy/${encodeURIComponent(m)}`);
       return new Response(text, {
         headers: { ...corsHeaders, "Content-Type": "application/vnd.apple.mpegurl" },
