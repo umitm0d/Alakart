@@ -27,7 +27,7 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           PAGES_URL: ${{ secrets.PAGES_URL }}
         run: |
-          python deploy_worker_pages.py
+          python update_workers.py
 
       - name: Test Worker
         env:
