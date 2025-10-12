@@ -1,7 +1,7 @@
 import os
 import re
-import requests
 import sys
+import requests
 
 WORKER_URL = os.getenv("WORKER_URL")  # örn: https://macyayin.umittv.workers.dev
 TEST_CHANNEL = "androstreamlivebs1.m3u8"
@@ -12,18 +12,15 @@ try:
     playlist_url = f"{WORKER_URL}/checklist/{TEST_CHANNEL}"
     print(f"🌐 İstek atılıyor: {playlist_url}")
     r = requests.get(playlist_url, timeout=10)
+    r.raise_for_status()
 
-    if r.status_code != 200:
-        sys.exit(f"❌ HTTP hata kodu: {r.status_code}")
+    if "mpegurl" not in r.headers.get("Content-Type", ""):
+        sys.exit(f"❌ Beklenmeyen Content-Type: {r.headers.get('Content-Type')}")
 
-    content_type = r.headers.get("Content-Type", "")
-    if "mpegurl" not in content_type:
-        sys.exit(f"❌ Beklenmeyen Content-Type: {content_type}")
+    text = r.text
+    print(f"📄 Playlist boyutu: {len(text)} karakter")
 
-    m3u8_text = r.text
-    print(f"📄 Playlist boyutu: {len(m3u8_text)} karakter")
-
-    proxy_links = re.findall(r"/proxy/https%3A%2F%2F[^\s\n]+", m3u8_text)
+    proxy_links = re.findall(r"/proxy/https%3A%2F%2F[^\s\n]+", text)
     if not proxy_links:
         sys.exit("❌ Playlist içinde hiç proxy linki bulunamadı!")
 
@@ -33,16 +30,13 @@ try:
     full_proxy_url = WORKER_URL + proxy_links[0]
     print(f"🔗 Proxy testi: {full_proxy_url}")
     pr = requests.get(full_proxy_url, stream=True, timeout=10)
-
-    if pr.status_code != 200:
-        sys.exit(f"❌ Proxy isteği başarısız! Kod: {pr.status_code}")
+    pr.raise_for_status()
 
     first_chunk = next(pr.iter_content(chunk_size=512))
     if not first_chunk:
         sys.exit("❌ Proxy içerik boş döndü!")
     print(f"📦 İlk chunk boyutu: {len(first_chunk)} bayt")
-
-    print("\n🎉 TÜM TESTLER GEÇTİ — Worker ve playlist düzgün çalışıyor!")
+    print("🎉 TÜM TESTLER GEÇTİ — Worker ve playlist düzgün çalışıyor!")
 
 except requests.exceptions.RequestException as e:
     sys.exit(f"❌ Ağ hatası: {e}")
