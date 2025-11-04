@@ -1,24 +1,45 @@
 #!/usr/bin/env python3
 """
-YouTube Stream Updater - yt-dlp versiyonu
+YouTube Stream Updater - Invidious alternatifleri
 """
 
 import json
 import os
 import sys
-import subprocess
+import requests
 import argparse
 from pathlib import Path
 import time
+import random
+
+# Çalışan Invidious instance'ları
+INVIDIOUS_INSTANCES = [
+    "https://vid.puffyan.us",
+    "https://inv.tux.pizza",
+    "https://y.com.sb",
+    "https://invidious.nerdvpn.de",
+    "https://yt.artemislena.eu",
+    "https://invidious.flokinet.to",
+    "https://inv.odyssey346.dev"
+]
 
 # Configuration
 FOLDER_NAME = os.environ.get('FOLDER_NAME', 'streams')
-TIMEOUT = 60
+TIMEOUT = 30
 MAX_RETRIES = 2
-RETRY_DELAY = 3
+RETRY_DELAY = 2
+
+# Session oluştur
+session = requests.Session()
+session.headers.update({
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://yewtu.be/'
+})
 
 def load_config(config_path):
-    """Load configuration from JSON file"""
+    """Config dosyasını yükle"""
     try:
         with open(config_path, 'r') as f:
             config = json.load(f)
@@ -28,75 +49,112 @@ def load_config(config_path):
         print(f"✗ Error loading config: {e}")
         sys.exit(1)
 
-def get_stream_with_ytdlp(stream_config):
-    """yt-dlp ile doğrudan stream URL'si al"""
+def get_random_instance():
+    """Rastgele bir Invidious instance seç"""
+    return random.choice(INVIDIOUS_INSTANCES)
+
+def fetch_stream_from_invidious(stream_config):
+    """Invidious API'den stream bilgisi al"""
     stream_type = stream_config.get('type', 'channel')
     stream_id = stream_config['id']
     slug = stream_config['slug']
     
+    instance = get_random_instance()
+    
     try:
         if stream_type == 'channel':
-            url = f"https://www.youtube.com/channel/{stream_id}/live"
+            # Kanalın canlı yayınını bul
+            channel_url = f"{instance}/api/v1/channels/{stream_id}"
+            print(f"🎬 {slug} - Checking channel...")
+            
+            response = session.get(channel_url, timeout=TIMEOUT)
+            if response.status_code == 200:
+                channel_data = response.json()
+                
+                # Son videoları kontrol et
+                videos_url = f"{instance}/api/v1/channels/{stream_id}/videos"
+                videos_response = session.get(videos_url, timeout=TIMEOUT)
+                
+                if videos_response.status_code == 200:
+                    videos_data = videos_response.json()
+                    
+                    # Canlı yayınları bul
+                    for video in videos_data.get('videos', []):
+                        if video.get('liveNow') or video.get('lengthSeconds') == 0:
+                            video_id = video['videoId']
+                            print(f"  ✓ Live stream found: {video_id}")
+                            return get_stream_url_from_video(instance, video_id, slug)
+                    
+                    print(f"  ⚠ No live stream found")
+                    return None
+                else:
+                    print(f"  ✗ Failed to get videos: {videos_response.status_code}")
+                    return None
+            else:
+                print(f"  ✗ Failed to get channel: {response.status_code}")
+                return None
+                
         elif stream_type == 'video':
-            url = f"https://www.youtube.com/watch?v={stream_id}"
+            # Direkt video
+            return get_stream_url_from_video(instance, stream_id, slug)
         else:
             print(f"✗ Unknown type: {stream_type}")
             return None
+            
+    except Exception as e:
+        print(f"  ✗ Error with {instance}: {e}")
+        return None
+
+def get_stream_url_from_video(instance, video_id, slug):
+    """Video'dan stream URL'sini al"""
+    try:
+        # Video bilgilerini al
+        video_url = f"{instance}/api/v1/videos/{video_id}"
+        response = session.get(video_url, timeout=TIMEOUT)
         
-        print(f"🎬 Fetching: {slug}")
-        print(f"  → URL: {url}")
-        
-        # yt-dlp ile m3u8 URL'sini al
-        cmd = [
-            'yt-dlp',
-            '-g',  # Sadece URL'yi al
-            '--format', 'best',  # En iyi kalite
-            '--no-warnings',
-            '--quiet',
-            '--no-check-certificates',
-            url
-        ]
-        
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT)
-        
-        if result.returncode == 0:
-            m3u8_url = result.stdout.strip()
-            if m3u8_url:
-                print(f"  ✓ Stream found")
+        if response.status_code == 200:
+            video_data = response.json()
+            
+            # Format stream'lerini kontrol et
+            format_streams = video_data.get('formatStreams', [])
+            adaptive_formats = video_data.get('adaptiveFormats', [])
+            
+            # Tüm formatları birleştir
+            all_formats = format_streams + adaptive_formats
+            
+            # m3u8 URL'lerini bul
+            m3u8_urls = []
+            for fmt in all_formats:
+                url = fmt.get('url', '')
+                if url and '.m3u8' in url:
+                    m3u8_urls.append(url)
+            
+            if m3u8_urls:
+                # İlk m3u8 URL'sini kullan
+                m3u8_url = m3u8_urls[0]
+                print(f"  ✓ Found m3u8 URL")
                 
                 # M3U8 içeriğini indir
-                curl_cmd = [
-                    'curl', '-s', '-L',
-                    '--max-time', '30',
-                    '--retry', '2',
-                    '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    m3u8_url
-                ]
-                
-                curl_result = subprocess.run(curl_cmd, capture_output=True, text=True)
-                
-                if curl_result.returncode == 0 and '#EXTM3U' in curl_result.text:
-                    print(f"  ✓ Valid m3u8 content received")
-                    return curl_result.text
+                m3u8_response = session.get(m3u8_url, timeout=TIMEOUT)
+                if m3u8_response.status_code == 200 and '#EXTM3U' in m3u8_response.text:
+                    print(f"  ✓ Valid m3u8 content")
+                    return m3u8_response.text
                 else:
-                    print(f"  ✗ Could not fetch m3u8 content")
+                    print(f"  ✗ Invalid m3u8 content")
                     return None
             else:
-                print(f"  ✗ No stream URL returned")
+                print(f"  ✗ No m3u8 URLs found")
                 return None
         else:
-            print(f"  ✗ yt-dlp error: {result.stderr.strip()}")
+            print(f"  ✗ Failed to get video: {response.status_code}")
             return None
             
-    except subprocess.TimeoutExpired:
-        print(f"  ✗ Timeout after {TIMEOUT}s")
-        return None
     except Exception as e:
-        print(f"  ✗ Exception: {e}")
+        print(f"  ✗ Error getting video stream: {e}")
         return None
 
 def fetch_stream_with_retry(stream_config):
-    """Stream alma işlemini retry ile yap"""
+    """Retry mekanizması ile stream al"""
     slug = stream_config['slug']
     
     for attempt in range(1, MAX_RETRIES + 1):
@@ -105,7 +163,7 @@ def fetch_stream_with_retry(stream_config):
             print(f"  → Retry {attempt}/{MAX_RETRIES} after {delay}s...")
             time.sleep(delay)
         
-        result = get_stream_with_ytdlp(stream_config)
+        result = fetch_stream_from_invidious(stream_config)
         if result is not None:
             return result
         
@@ -140,9 +198,7 @@ def reverse_hls_quality(m3u8_content):
     if current_block:
         stream_blocks.append(current_block)
     
-    # Yüksek kalite önce
     stream_blocks.reverse()
-    
     result = ['#EXTM3U']
     for block in stream_blocks:
         result.extend(block)
@@ -199,57 +255,34 @@ def save_stream(stream_config, m3u8_content):
 def parse_arguments():
     """Komut satırı argümanlarını parse et"""
     parser = argparse.ArgumentParser(
-        description='Update YouTube stream m3u8 playlists using yt-dlp'
+        description='Update YouTube stream m3u8 playlists using Invidious'
     )
     
     parser.add_argument('config_files', nargs='+', help='Configuration file(s)')
     parser.add_argument('--folder', default=FOLDER_NAME, help='Output folder')
     parser.add_argument('--timeout', type=int, default=TIMEOUT, help='Request timeout')
     parser.add_argument('--retries', type=int, default=MAX_RETRIES, help='Max retries')
-    parser.add_argument('--retry-delay', type=int, default=RETRY_DELAY, help='Retry delay')
     
     return parser.parse_args()
-
-def check_ytdlp():
-    """yt-dlp'nin kurulu olduğunu kontrol et"""
-    try:
-        result = subprocess.run(['yt-dlp', '--version'], 
-                              capture_output=True, text=True, check=True)
-        print(f"✓ yt-dlp version: {result.stdout.strip()}")
-        return True
-    except:
-        print("✗ yt-dlp not found. Installing...")
-        try:
-            subprocess.run([sys.executable, '-m', 'pip', 'install', 'yt-dlp'], 
-                         check=True, capture_output=True)
-            print("✓ yt-dlp installed successfully")
-            return True
-        except Exception as e:
-            print(f"✗ Failed to install yt-dlp: {e}")
-            return False
 
 def main():
     """Ana fonksiyon"""
     args = parse_arguments()
     
-    global FOLDER_NAME, TIMEOUT, MAX_RETRIES, RETRY_DELAY
+    global FOLDER_NAME, TIMEOUT, MAX_RETRIES
     FOLDER_NAME = args.folder
     TIMEOUT = args.timeout
     MAX_RETRIES = args.retries
-    RETRY_DELAY = args.retry_delay
     
     print("=" * 50)
-    print("YouTube Stream Updater - yt-dlp")
+    print("YouTube Stream Updater - Invidious")
     print("=" * 50)
     print(f"Output folder: {FOLDER_NAME}")
     print(f"Config files: {', '.join(args.config_files)}")
     print(f"Timeout: {TIMEOUT}s")
     print(f"Max retries: {MAX_RETRIES}")
+    print(f"Available instances: {len(INVIDIOUS_INSTANCES)}")
     print("=" * 50)
-    
-    # yt-dlp kontrolü
-    if not check_ytdlp():
-        sys.exit(1)
     
     total_success = 0
     total_fail = 0
@@ -279,10 +312,6 @@ def main():
     print("\n" + "=" * 50)
     print(f"✅ Complete: {total_success} successful, {total_fail} failed")
     print("=" * 50)
-    
-    if total_success == 0:
-        print("❌ No streams were updated")
-        sys.exit(1)
 
 if __name__ == "__main__":
     main()
