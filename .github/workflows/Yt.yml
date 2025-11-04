@@ -24,12 +24,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install cloudscraper
-        pip install requests
+        pip install yt-dlp
         
     - name: Run stream updater
       env:
-        ENDPOINT: ${{ secrets.ENDPOINT }}
         FOLDER_NAME: 'TR'
       run: |
         python update_streams.py turkish.json
@@ -49,5 +47,5 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git commit -m "Update Turkish streams via yewtu.be"
+        git commit -m "Update Turkish streams via yt-dlp"
         git push
