@@ -78,14 +78,14 @@ def fetch_stream_url_with_retry(stream_config):
     print(f"  ✗ All {MAX_RETRIES} attempts failed for {slug}")
     return None, last_error_type
 
-def get_live_stream_id_from_channel(channel_handle):
-    """Get live stream ID from channel handle using Invidious"""
+def get_live_stream_id_from_channel(channel_id):
+    """Get live stream ID from channel ID using Invidious"""
     for instance in INVIDIOUS_INSTANCES:
         try:
-            print(f"  → Checking {instance} for channel: {channel_handle}")
+            print(f"  → Checking {instance} for channel: {channel_id}")
             
-            # Method 1: Try channel page
-            channel_url = f"{instance}/channel/@{channel_handle}"
+            # Method 1: Try channel page with ID
+            channel_url = f"{instance}/channel/{channel_id}"
             response = session.get(channel_url, timeout=TIMEOUT)
             
             if response.status_code == 200:
@@ -107,8 +107,8 @@ def get_live_stream_id_from_channel(channel_handle):
                     print(f"  ✓ Found live stream (alt): {live_id}")
                     return live_id
             
-            # Method 2: Try API
-            api_url = f"{instance}/api/v1/channels/@{channel_handle}"
+            # Method 2: Try API with channel ID
+            api_url = f"{instance}/api/v1/channels/{channel_id}"
             api_response = session.get(api_url, timeout=TIMEOUT)
             
             if api_response.status_code == 200:
@@ -123,7 +123,7 @@ def get_live_stream_id_from_channel(channel_handle):
             print(f"  ✗ Failed with {instance}: {e}")
             continue
     
-    print(f"  ✗ No live stream found for channel: {channel_handle}")
+    print(f"  ✗ No live stream found for channel: {channel_id}")
     return None
 
 def fetch_stream_url(stream_config):
