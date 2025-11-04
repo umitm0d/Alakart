@@ -4,9 +4,8 @@ on:
   push:
     branches: [ main, master ]
   schedule:
-    # Her 30 dakikada bir çalıştır (YouTube stream URL'leri sık değişir)
-    - cron: '*/30 * * * *'
-  workflow_dispatch: # Manuel çalıştırma için
+    - cron: '*/30 * * * *'  # Her 30 dakikada bir
+  workflow_dispatch:
 
 jobs:
   update-streams:
@@ -22,7 +21,6 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-        cache: 'pip'
         
     - name: 📦 Install dependencies
       run: |
