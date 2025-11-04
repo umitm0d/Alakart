@@ -2,7 +2,7 @@ name: Update Streams - Turkish
 
 on:
   schedule:
-    - cron: '0 */3 * * *'
+    - cron: '0 */6 * * *'  # 6 saatte bir
   workflow_dispatch:
   push:
     branches: [main]
@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install yt-dlp
+        pip install requests
         
     - name: Run stream updater
       env:
@@ -47,5 +47,5 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git commit -m "Update Turkish streams via yt-dlp"
+        git commit -m "Update Turkish streams via Invidious"
         git push
