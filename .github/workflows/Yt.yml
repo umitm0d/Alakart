@@ -1,0 +1,59 @@
+name: Update YouTube Streams
+
+on:
+  push:
+    branches: [ main, master ]
+  schedule:
+    # Her 30 dakikada bir çalıştır (YouTube stream URL'leri sık değişir)
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Manuel çalıştırma için
+
+jobs:
+  update-streams:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+        
+    - name: 🚀 Update YouTube streams
+      run: |
+        python update_streams_invidious.py configs/streams.json
+      env:
+        MAX_RETRIES: 5
+        TIMEOUT: 45
+        
+    - name: 📊 Show update results
+      run: |
+        echo "📁 Generated files:"
+        find streams/ -name "*.m3u8" -type f | head -10
+        echo ""
+        echo "📈 File counts:"
+        find streams/ -name "*.m3u8" -type f | wc -l
+        
+    - name: 💾 Commit and push if changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add streams/
+        
+        if git diff --staged --quiet; then
+          echo "✅ No changes to commit"
+        else
+          git commit -m "🔄 Update stream playlists [$(date +'%Y-%m-%d %H:%M')]"
+          git push
+          echo "✅ Changes committed and pushed"
+        fi
