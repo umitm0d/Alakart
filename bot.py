@@ -1,60 +1,62 @@
 import time
+import json
 import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
 
-# Tarayıcıyı "Görünmez" modda ayarla
 options = Options()
 options.add_argument("--headless")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
-options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+# Ağ trafiğini izlemek için gerekli ayar
+options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-def get_links():
-    # Örnek kategori sayfası
-    url = "https://www.canlidizi14.com/kategori/digi/kismetse-olur-askin-gucu-izle"
-    driver.get(url)
-    time.sleep(5)
-    
-    # Bölüm linklerini topla
-    elems = driver.find_elements(By.XPATH, "//a[contains(@href, 'bolum-izle')]")
-    links = list(set([e.get_attribute("href") for e in elems]))
-    return links
-
-def extract_video(url):
-    driver.get(url)
-    # Sayfanın ve JavaScript'in yüklenmesi için 10 saniye bekle
-    time.sleep(10)
-    
-    html = driver.page_source
-    # Twitter m3u8 linkini ara
-    match = re.search(r'https?://video\.twimg\.com/amplify_video/[^"\']+\.m3u8[^"\']*', html)
-    if match:
-        return match.group(0).replace("\\/", "/")
+def get_m3u8_from_network():
+    """Tarayıcının ağ trafiğini tarayarak m3u8 linkini bulur."""
+    logs = driver.get_log("performance")
+    for entry in logs:
+        log = json.loads(entry["message"])["message"]
+        if "Network.requestWillBeSent" in log["method"]:
+            url = log["params"]["request"]["url"]
+            if "video.twimg.com" in url and ".m3u8" in url:
+                return url
     return None
 
 def main():
-    print("Bot başlatıldı...")
-    target_links = get_links()
-    print(f"{len(target_links)} bölüm bulundu.")
+    # Önce kategori sayfasından bölüm linklerini alalım (veya manuel bir liste kullan)
+    base_url = "https://www.canlidizi14.com/kategori/digi/kismetse-olur-askin-gucu-izle"
+    driver.get(base_url)
+    time.sleep(5)
     
+    # Sayfadaki bölüm linklerini topla
+    links = []
+    elems = driver.find_elements("xpath", "//a[contains(@href, 'bolum-izle')]")
+    for e in elems:
+        href = e.get_attribute("href")
+        if href not in links: links.append(href)
+
+    print(f"{len(links)} bölüm bulundu. Tarama başlıyor...")
+
     with open("canlidizi_listesi.m3u", "w", encoding="utf-8") as f:
         f.write("#EXTM3U\n")
-        for link in target_links[:10]: # Test için ilk 10 bölüm
-            name = link.split('/')[-1]
-            print(f"İşleniyor: {name}...", end=" ")
-            video = extract_video(link)
-            if video:
-                f.write(f"#EXTINF:-1, {name}\n{video}\n")
-                print("OK!")
+        for link in links[:15]: # GitHub süresi dolmasın diye ilk 15 bölüm
+            print(f"İşleniyor: {link}")
+            driver.get(link)
+            
+            # Videonun yüklenmesi ve isteğin atılması için bekle
+            time.sleep(10) 
+            
+            video_url = get_m3u8_from_network()
+            if video_url:
+                name = link.split('/')[-1].replace(".html", "")
+                f.write(f"#EXTINF:-1, {name}\n{video_url}\n")
+                print(f"BULDUM: {video_url}")
             else:
-                print("YOK")
-            time.sleep(2)
+                print("Bulunamadı.")
 
     driver.quit()
 
