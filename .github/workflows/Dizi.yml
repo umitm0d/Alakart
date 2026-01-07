@@ -1,0 +1,33 @@
+name: Dizi Botunu Calistir
+
+on:
+  workflow_dispatch: # Manuel baslatma butonu ekler
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu cek
+        uses: actions/checkout@v3
+
+      - name: Python Kur
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Chrome Kur
+        run: |
+          sudo apt-get update
+          sudo apt-get install -install google-chrome-stable
+
+      - name: Kutuphaneleri Kur
+        run: pip install -r requirements.txt
+
+      - name: Botu Calistir
+        run: python bot.py
+
+      - name: Dosyayi Kaydet
+        uses: actions/upload-artifact@v3
+        with:
+          name: dizi-listesi
+          path: canlidizi_listesi.m3u
