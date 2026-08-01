@@ -1,0 +1,55 @@
+name: Private Kaynaktan Build ve Pages Deploy
+
+# Bu workflow PUBLIC repoda (Alakart) yaşıyor ama kaynak kodu
+# PRIVATE repodan (Alakart-source) çekiyor. Build çıktısı hiçbir zaman
+# git'e commit edilmiyor — doğrudan GitHub Pages'in yayın katmanına
+# "artifact" olarak gönderiliyor. Yani bu reponun dosya ağacında
+# (Code sekmesinde) index.html hiçbir zaman görünmeyecek.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write        # Pages'e deploy edebilmek için gerekli
+  id-token: write      # Pages deploy doğrulaması için gerekli
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # Kaynak kodu PRIVATE repodan çekiyoruz (bu repo değil!)
+      - name: Private kaynak reposunu çek
+        uses: actions/checkout@v4
+        with:
+          repository: umitm0d/Alakart-source
+          token: ${{ secrets.PRIVATE_REPO_PAT }}
+
+      - name: Node.js kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Bağımlılıkları yükle
+        run: npm install
+
+      - name: Obfuscate + minify çalıştır
+        run: npm run build
+
+      # dist/ klasörünü GitHub'ın Pages artifact formatına paketle
+      - name: Pages artifact'ini hazırla
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      # Paketi doğrudan Pages'e yayınla — git commit YOK
+      - name: GitHub Pages'e deploy et
+        id: deployment
+        uses: actions/deploy-pages@v4
