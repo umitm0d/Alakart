@@ -78,6 +78,27 @@ jobs:
       - name: Obfuscate + minify çalıştır
         run: npm run build
 
+      # ---- KRİTİK: manifest.json ve sw.js dosyaları dist/ içine kopyalanmıyordu ----
+      # build-obfuscate.js SADECE Umitm0dstore.html'i işleyip dist/Umitstore.html
+      # olarak yazıyor. manifest.json ve sw.js hiçbir adımda dist/ klasörüne
+      # kopyalanmadığı için GitHub Pages'te bu iki dosya 404 dönüyordu; bu da
+      # service worker kaydının (ve dolayısıyla arka plan bildirim kontrolü,
+      # otomatik güncelleme yenilemesi, uygulama ikonu rozeti gibi her şeyin)
+      # canlıda hiç çalışmamasına sebep oluyordu.
+      - name: Statik dosyaları (manifest.json, sw.js) dist'e kopyala
+        run: |
+          if [ ! -f "manifest.json" ]; then
+            echo "::error::manifest.json repo kökünde bulunamadı."
+            exit 1
+          fi
+          if [ ! -f "source/sw.js" ]; then
+            echo "::error::source/sw.js bulunamadı."
+            exit 1
+          fi
+          cp manifest.json dist/manifest.json
+          cp source/sw.js dist/sw.js
+          echo "✅ manifest.json ve sw.js (source/sw.js'den) dist/ içine kopyalandı"
+
       - name: Enjeksiyonun build çıktısına geçtiğini doğrula
         run: |
           if grep -q "__TEASER_VIDEO_URL__" dist/Umitstore.html; then
