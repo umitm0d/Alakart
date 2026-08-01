@@ -35,14 +35,19 @@ jobs:
       - name: Bağımlılıkları yükle
         run: npm install
 
-      - name: Obfuscate + minify çalıştır
-        run: npm run build
-
-      # ---- Teaser video linkini yalnızca build ÇIKTISINA (dist/) enjekte et ----
-      # Kaynak repoda (Alakart-source) veya bu workflow'un log'unda link hiçbir
-      # zaman düz görünmez; sadece bu adımdan sonra dist/Umitstore.html içinde
-      # bulunur ve o da doğrudan Pages'e yüklenir, geri commit ATILMAZ.
-      - name: Teaser video linkini enjekte et
+      # ---- Teaser video linkini KAYNAK dosyaya (source/), OBFUSCATE'DEN ÖNCE enjekte et ----
+      # ÖNEMLİ: javascript-obfuscator, stringArray: true ayarıyla TÜM string
+      # literal'leri (placeholder dahil) base64 kodlu bir diziye taşıyor.
+      # Bu yüzden enjeksiyon build SONRASI (dist/) yapılırsa placeholder metni
+      # artık bulunamıyor ve video linki hep boş kalıyordu. Çözüm: enjeksiyonu
+      # build'den önce, source dosyasında yapmak — obfuscator normal bir string
+      # literal'i (gerçek URL) obfuscate eder, bu sorun teşkil etmez.
+      #
+      # Bu adım checkout edilen working copy'yi değiştirir ama HİÇBİR ZAMAN
+      # commit/push edilmez (sadece bu runner'ın geçici diskinde yaşar),
+      # dolayısıyla Alakart-source reposunun git history'sine gerçek link
+      # yine de sızmaz.
+      - name: Teaser video linkini kaynağa enjekte et (build öncesi)
         env:
           TEASER_VIDEO_URL: ${{ secrets.TEASER_VIDEO_URL }}
         run: |
@@ -50,24 +55,36 @@ jobs:
             echo "::error::TEASER_VIDEO_URL secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin."
             exit 1
           fi
-          if [ ! -f "dist/Umitstore.html" ]; then
-            echo "::error::dist/Umitstore.html bulunamadı, build çıktısı beklenenden farklı olabilir."
+          if [ ! -f "source/Umitm0dstore.html" ]; then
+            echo "::error::source/Umitm0dstore.html bulunamadı."
             exit 1
           fi
-          if ! grep -q "__TEASER_VIDEO_URL__" dist/Umitstore.html; then
-            echo "::warning::Placeholder __TEASER_VIDEO_URL__ dist/Umitstore.html içinde bulunamadı, kontrol edin."
+          if ! grep -q "__TEASER_VIDEO_URL__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __TEASER_VIDEO_URL__ source/Umitm0dstore.html içinde bulunamadı. Kaynak dosya beklenenden farklı olabilir."
+            exit 1
           fi
           python3 - "$TEASER_VIDEO_URL" << 'EOF'
           import sys, io
           url = sys.argv[1]
-          path = "dist/Umitstore.html"
+          path = "source/Umitm0dstore.html"
           with io.open(path, "r", encoding="utf-8") as f:
               html = f.read()
           html = html.replace("__TEASER_VIDEO_URL__", url)
           with io.open(path, "w", encoding="utf-8") as f:
               f.write(html)
           EOF
-          echo "✅ Teaser video linki dist/Umitstore.html içine enjekte edildi (yalnızca deploy çıktısında)."
+          echo "✅ Teaser video linki source/Umitm0dstore.html içine enjekte edildi (build henüz çalışmadı, bu dosya commit edilmeyecek)."
+
+      - name: Obfuscate + minify çalıştır
+        run: npm run build
+
+      - name: Enjeksiyonun build çıktısına geçtiğini doğrula
+        run: |
+          if grep -q "__TEASER_VIDEO_URL__" dist/Umitstore.html; then
+            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          echo "✅ Doğrulandı: dist/Umitstore.html içinde placeholder kalmamış."
 
       - name: Pages artifact'ini hazırla
         uses: actions/upload-pages-artifact@v3
