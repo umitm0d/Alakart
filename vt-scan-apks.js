@@ -7,9 +7,7 @@ const APPS_JSON_URL = process.env.APPS_JSON_URL; // artık koda gömülü değil
 const OUTPUT_FILE = 'vt-scan-results.json';
 const DELAY_MS = 16000; // dakikada 4 istek limiti için ~16sn ara (ücretsiz key)
 
-// TEST_LIMIT ile ilk denemede sadece ilk N uygulamayı tara.
-// Örn: TEST_LIMIT=1 VT_API_KEY=xxx APPS_JSON_URL=xxx node vt-scan-apks.js
-// Her şey doğru çalıştığını gördükten sonra TEST_LIMIT'i kaldırıp tam listeyi taratabilirsin.
+
 const TEST_LIMIT = process.env.TEST_LIMIT ? parseInt(process.env.TEST_LIMIT, 10) : null;
 
 if (!APPS_JSON_URL) {
@@ -48,12 +46,33 @@ async function checkExistingReport(hash) {
   return summarize(json.data);
 }
 
+const LARGE_FILE_THRESHOLD = 32 * 1024 * 1024; // 32MB — VT üstü için özel upload URL istiyor
+
+async function getUploadUrl() {
+  const res = await fetch('https://www.virustotal.com/api/v3/files/upload_url', {
+    headers: { 'x-apikey': VT_API_KEY },
+  });
+  if (!res.ok) throw new Error(`VT upload_url alınamadı: ${res.status}`);
+  const json = await res.json();
+  return json.data; // özel yükleme URL'si
+}
+
 async function uploadAndScan(buffer, filename) {
   const FormData = require('form-data');
   const form = new FormData();
   form.append('file', buffer, filename);
 
-  const uploadRes = await fetch('https://www.virustotal.com/api/v3/files', {
+  // 32MB'den büyük dosyalar standart /files endpoint'ini kabul etmiyor (413 hatası verir),
+  // bunlar için önce özel bir yükleme URL'si almamız gerekiyor.
+  const targetUrl = buffer.length > LARGE_FILE_THRESHOLD
+    ? await getUploadUrl()
+    : 'https://www.virustotal.com/api/v3/files';
+
+  if (buffer.length > LARGE_FILE_THRESHOLD) {
+    console.log(`  dosya ${(buffer.length / 1024 / 1024).toFixed(1)}MB, büyük dosya yükleme URL'si kullanılıyor...`);
+  }
+
+  const uploadRes = await fetch(targetUrl, {
     method: 'POST',
     headers: { 'x-apikey': VT_API_KEY },
     body: form,
