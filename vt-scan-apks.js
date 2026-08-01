@@ -1,34 +1,22 @@
-/**
- * vt-scan-apks.js
- * ------------------------------------------------------------
- * APK'ları VirusTotal'a yükleyip tarama sonuçlarını dosyaya yazar.
- * BU SCRIPT SENİN KENDİ BİLGİSAYARINDA / SUNUCUNDA ÇALIŞTIRILMALI.
- * API anahtarını asla front-end (HTML/JS) koduna koyma.
- *
- * Kurulum:
- *   npm install node-fetch@2
- *   VT_API_KEY=xxxx node vt-scan-apks.js
- *
- * VT_API_KEY'i https://www.virustotal.com/gui/my-apikey adresinden alabilirsin.
- * Ücretsiz key limiti: dakikada 4 istek, günde 500 istek — bu yüzden script
- * istekler arasında bekliyor. Çok sayıda uygulaman varsa taramanın
- * tamamlanması saatler sürebilir, bu normaldir.
- * ------------------------------------------------------------
- */
-
 const fetch = require('node-fetch');
 const fs = require('fs');
 const crypto = require('crypto');
 
 const VT_API_KEY = process.env.VT_API_KEY;
-const APPS_JSON_URL = 'https://tinyurl.com/Umitm0djson'; // mevcut apps.json kaynağın
+const APPS_JSON_URL = process.env.APPS_JSON_URL; // artık koda gömülü değil, secret'tan geliyor
 const OUTPUT_FILE = 'vt-scan-results.json';
 const DELAY_MS = 16000; // dakikada 4 istek limiti için ~16sn ara (ücretsiz key)
 
 // TEST_LIMIT ile ilk denemede sadece ilk N uygulamayı tara.
-// Örn: TEST_LIMIT=1 VT_API_KEY=xxx node vt-scan-apks.js
+// Örn: TEST_LIMIT=1 VT_API_KEY=xxx APPS_JSON_URL=xxx node vt-scan-apks.js
 // Her şey doğru çalıştığını gördükten sonra TEST_LIMIT'i kaldırıp tam listeyi taratabilirsin.
 const TEST_LIMIT = process.env.TEST_LIMIT ? parseInt(process.env.TEST_LIMIT, 10) : null;
+
+if (!APPS_JSON_URL) {
+  console.error('HATA: APPS_JSON_URL ortam değişkeni tanımlı değil.');
+  console.error('Kullanım: APPS_JSON_URL=https://... VT_API_KEY=xxx node vt-scan-apks.js');
+  process.exit(1);
+}
 
 if (!VT_API_KEY) {
   console.error('HATA: VT_API_KEY ortam değişkeni tanımlı değil.');
