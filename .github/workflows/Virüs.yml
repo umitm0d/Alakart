@@ -41,6 +41,7 @@ jobs:
       - name: VirusTotal taramasını çalıştır
         env:
           VT_API_KEY: ${{ secrets.VT_API_KEY }}
+          APPS_JSON_URL: ${{ secrets.APPS_JSON_URL }}
           TEST_LIMIT: ${{ github.event.inputs.test_limit }}
         run: node vt-scan-apks.js
 
