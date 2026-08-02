@@ -261,6 +261,24 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+      # ---- Google Cloud kimlik doğrulama (Firebase RTDB REST API için) ----
+      # Google, RTDB için eski "database secret" (?auth=SECRET) yöntemini
+      # kaldırdı. Artık yetkilendirme bir SERVİS HESABI (service account) JSON
+      # anahtarından üretilen OAuth2 access token ile yapılıyor. Bu adım,
+      # FIREBASE_SERVICE_ACCOUNT_JSON secret'ındaki (Firebase Console >
+      # Project Settings > Service accounts > Generate new private key ile
+      # indirilen JSON dosyasının TAM İÇERİĞİ) anahtardan kısa ömürlü bir
+      # access token üretir. Bu token, admin SDK service account'u olduğu için
+      # RTDB security rules'ı (ör. system/appVersion'daki ".write": false)
+      # normal database secret gibi bypass eder.
+      - name: Google Cloud kimlik doğrulama (Firebase RTDB için)
+        id: gcp_auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          token_format: 'access_token'
+          access_token_scopes: 'https://www.googleapis.com/auth/firebase.database,https://www.googleapis.com/auth/userinfo.email'
+
       # ---- Firebase RTDB'ye anlık (push) sürüm bildirimi ----
       # ÖNEMLİ: Bu adım BİLEREK en sona, "GitHub Pages'e deploy et" adımından
       # SONRAYA taşındı. Önceki sürümde bu adım deploy'dan ÖNCE çalışıyordu:
@@ -278,15 +296,12 @@ jobs:
       # .on('value', ...) ile canlı dinliyor. Burada o düğümü güncelleyince, o an
       # açık olan tüm sekmeler polling beklemeden anında (Firebase'in zaten açık
       # olan bağlantısı üzerinden) haberdar oluyor.
-      # FIREBASE_DB_SECRET: Firebase Console > Project Settings > Service accounts >
-      # Database secrets. Bu secret RTDB rules'ı bypass eder, o yüzden
-      # system/appVersion düğümünün ".write" kuralı false olsa bile buradan yazılabilir.
       # Bilinçli olarak job'u BLOKLAMIYOR (exit 1 yok): Firebase erişilemez olsa
       # bile deploy zaten tamamlanmış durumda; client'lar en kötü ihtimalle bir
       # sonraki 15sn'lik version.json polling turunda güncellenir.
       - name: Firebase RTDB'ye sürüm bildir (anlık güncelleme push'u, deploy SONRASI)
         env:
-          FIREBASE_DB_SECRET: ${{ secrets.FIREBASE_DB_SECRET }}
+          ACCESS_TOKEN: ${{ steps.gcp_auth.outputs.access_token }}
           SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
         run: |
           # Ekstra güvenlik payı: deploy-pages@v4 "başarılı" dese bile GitHub'ın
@@ -294,12 +309,13 @@ jobs:
           # Firebase bildirimini bu küçük payı bekleyerek gönderiyoruz.
           echo "CDN'in tam yayılması için 15 sn bekleniyor..."
           sleep 15
-          if [ -z "$FIREBASE_DB_SECRET" ]; then
-            echo "::warning::FIREBASE_DB_SECRET secret'ı tanımlı değil, anlık güncelleme push'u atlandı. Eklemek için: Firebase Console > Project Settings > Service accounts > Database secrets, sonra repo Settings > Secrets and variables > Actions."
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "::warning::Google Cloud access token alınamadı (FIREBASE_SERVICE_ACCOUNT_JSON secret'ı eksik/geçersiz olabilir), anlık güncelleme push'u atlandı. Eklemek için: Firebase Console > Project Settings > Service accounts > Generate new private key, sonra repo Settings > Secrets and variables > Actions > FIREBASE_SERVICE_ACCOUNT_JSON."
             exit 0
           fi
           HTTP_CODE=$(curl -s -o /tmp/firebase_response.json -w "%{http_code}" -X PUT \
-            "https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app/system/appVersion.json?auth=${FIREBASE_DB_SECRET}" \
+            "https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app/system/appVersion.json" \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
             -d "{\"version\":\"${SOURCE_SHA}\",\"ts\":$(date +%s)000}")
           cat /tmp/firebase_response.json
           if [ "$HTTP_CODE" != "200" ]; then
