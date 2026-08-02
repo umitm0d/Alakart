@@ -27,6 +27,20 @@ jobs:
           repository: umitm0d/Alakart-source
           token: ${{ secrets.PRIVATE_REPO_PAT }}
 
+      # ---- KRİTİK DÜZELTME ----
+      # ${{ github.sha }} / $GITHUB_SHA, workflow'un YAŞADIĞI repo'nun (public Alakart)
+      # SHA'sını verir; yukarıda checkout edilen PRIVATE repo'nun (Alakart-source) SHA'sını
+      # DEĞİL. Alakart reposuna hiç push yapılmadığı için bu değer build'den build'e HİÇ
+      # değişmiyordu — bu yüzden version.json/Firebase her zaman aynı "sürümü" bildiriyor
+      # ve client asla güncelleme farkı görmüyordu. Çözüm: checkout SONRASI, artık çalışma
+      # dizininde bulunan private repo'nun gerçek HEAD SHA'sını git'ten okuyup onu kullan.
+      - name: Gerçek kaynak (private repo) commit SHA'sını yakala
+        id: source_sha
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Kaynak repo commit SHA: $SHA"
+
       - name: Node.js kur
         uses: actions/setup-node@v4
         with:
@@ -161,8 +175,10 @@ jobs:
             echo "::error::Placeholder __APP_BUILD_VERSION__ source/Umitm0dstore.html içinde bulunamadı."
             exit 1
           fi
-          sed -i "s/__APP_BUILD_VERSION__/${GITHUB_SHA}/g" source/Umitm0dstore.html
-          echo "✅ Uygulama sürümü (${GITHUB_SHA}) source/Umitm0dstore.html içine enjekte edildi."
+          sed -i "s/__APP_BUILD_VERSION__/${SOURCE_SHA}/g" source/Umitm0dstore.html
+          echo "✅ Uygulama sürümü (${SOURCE_SHA}) source/Umitm0dstore.html içine enjekte edildi."
+        env:
+          SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
 
       - name: Obfuscate + minify çalıştır
         run: npm run build
@@ -203,8 +219,10 @@ jobs:
       # içeriği değiştiği için güncelliği güvenilir şekilde tespit ediyor.
       - name: version.json oluştur
         run: |
-          echo "{\"version\":\"${GITHUB_SHA}\",\"builtAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > dist/version.json
+          echo "{\"version\":\"${SOURCE_SHA}\",\"builtAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > dist/version.json
           echo "✅ dist/version.json oluşturuldu"
+        env:
+          SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
 
       # ---- Firebase RTDB'ye anlık (push) sürüm bildirimi ----
       # Sayfa içindeki listenForAppUpdateRealtime() system/appVersion düğümünü
@@ -220,6 +238,7 @@ jobs:
       - name: Firebase RTDB'ye sürüm bildir (anlık güncelleme push'u)
         env:
           FIREBASE_DB_SECRET: ${{ secrets.FIREBASE_DB_SECRET }}
+          SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
         run: |
           if [ -z "$FIREBASE_DB_SECRET" ]; then
             echo "::warning::FIREBASE_DB_SECRET secret'ı tanımlı değil, anlık güncelleme push'u atlandı. Eklemek için: Firebase Console > Project Settings > Service accounts > Database secrets, sonra repo Settings > Secrets and variables > Actions."
@@ -227,13 +246,13 @@ jobs:
           fi
           HTTP_CODE=$(curl -s -o /tmp/firebase_response.json -w "%{http_code}" -X PUT \
             "https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app/system/appVersion.json?auth=${FIREBASE_DB_SECRET}" \
-            -d "{\"version\":\"${GITHUB_SHA}\",\"ts\":$(date +%s)000}")
+            -d "{\"version\":\"${SOURCE_SHA}\",\"ts\":$(date +%s)000}")
           cat /tmp/firebase_response.json
           if [ "$HTTP_CODE" != "200" ]; then
             echo "::warning::Firebase RTDB'ye sürüm yazılamadı (HTTP ${HTTP_CODE}). Deploy yine de devam ediyor; client'lar en kötü ihtimalle hash/version.json kontrolünde güncellenir."
             exit 0
           fi
-          echo "✅ Firebase system/appVersion güncellendi (${GITHUB_SHA})"
+          echo "✅ Firebase system/appVersion güncellendi (${SOURCE_SHA})"
 
       - name: Enjeksiyonun build çıktısına geçtiğini doğrula
         run: |
