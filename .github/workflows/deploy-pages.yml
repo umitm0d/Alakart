@@ -211,29 +211,42 @@ jobs:
       # .on('value', ...) ile canlı dinliyor. Burada o düğümü GITHUB_SHA ile
       # güncelleyince, o an açık olan tüm sekmeler polling beklemeden anında
       # (Firebase'in zaten açık olan bağlantısı üzerinden) haberdar oluyor.
-      # FIREBASE_DB_SECRET: Firebase Console > Project Settings > Service accounts >
-      # Database secrets. Bu secret RTDB rules'ı bypass eder, o yüzden
+      # FIREBASE_SERVICE_ACCOUNT_JSON: Firebase Console > Project Settings >
+      # Service accounts > "Generate new private key" ile inen JSON dosyasının
+      # TAMAMI. Admin SDK kimlik doğrulaması RTDB rules'ı bypass eder, o yüzden
       # system/appVersion düğümünün ".write" kuralı false olsa bile buradan yazılabilir.
-      # Bilinçli olarak site deploy'unu BLOKLAMIYOR (exit 1 yok): Firebase erişilemez
-      # olsa bile GitHub Pages'e deploy normal şekilde devam etsin, client'lar en
-      # kötü ihtimalle bir sonraki hash/version.json kontrolünde güncellenir.
+      # Bilinçli olarak site deploy'unu BLOKLAMIYOR: Firebase erişilemez olsa
+      # bile GitHub Pages'e deploy normal şekilde devam etsin.
       - name: Firebase RTDB'ye sürüm bildir (anlık güncelleme push'u)
         env:
-          FIREBASE_DB_SECRET: ${{ secrets.FIREBASE_DB_SECRET }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
-          if [ -z "$FIREBASE_DB_SECRET" ]; then
-            echo "::warning::FIREBASE_DB_SECRET secret'ı tanımlı değil, anlık güncelleme push'u atlandı. Eklemek için: Firebase Console > Project Settings > Service accounts > Database secrets, sonra repo Settings > Secrets and variables > Actions."
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT_JSON secret'ı tanımlı değil, anlık güncelleme push'u atlandı. Eklemek için: Firebase Console > Project Settings > Service accounts > Generate new private key, sonra repo Settings > Secrets and variables > Actions."
             exit 0
           fi
-          HTTP_CODE=$(curl -s -o /tmp/firebase_response.json -w "%{http_code}" -X PUT \
-            "https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app/system/appVersion.json?auth=${FIREBASE_DB_SECRET}" \
-            -d "{\"version\":\"${GITHUB_SHA}\",\"ts\":$(date +%s)000}")
-          cat /tmp/firebase_response.json
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "::warning::Firebase RTDB'ye sürüm yazılamadı (HTTP ${HTTP_CODE}). Deploy yine de devam ediyor; client'lar en kötü ihtimalle hash/version.json kontrolünde güncellenir."
-            exit 0
-          fi
-          echo "✅ Firebase system/appVersion güncellendi (${GITHUB_SHA})"
+          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > /tmp/firebase-service-account.json
+          npm install firebase-admin --no-save --silent
+          cat > /tmp/push-version.js << 'EOF'
+          const admin = require('firebase-admin');
+          const serviceAccount = require('/tmp/firebase-service-account.json');
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: 'https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app'
+          });
+          admin.database().ref('system/appVersion').set({
+            version: process.env.GITHUB_SHA,
+            ts: Date.now()
+          }).then(() => {
+            console.log('✅ Firebase system/appVersion güncellendi');
+            process.exit(0);
+          }).catch((err) => {
+            console.log('::warning::Firebase yazma hatası: ' + err.message);
+            process.exit(0);
+          });
+          EOF
+          node /tmp/push-version.js
+          rm -f /tmp/firebase-service-account.json
 
       - name: Enjeksiyonun build çıktısına geçtiğini doğrula
         run: |
