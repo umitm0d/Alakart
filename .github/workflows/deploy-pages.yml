@@ -75,6 +75,42 @@ jobs:
           EOF
           echo "✅ Teaser video linki source/Umitm0dstore.html içine enjekte edildi (build henüz çalışmadı, bu dosya commit edilmeyecek)."
 
+      # ---- Cloudinary cloud name / upload preset enjeksiyonu (build öncesi, aynı sebepten: obfuscator öncesi) ----
+      - name: Cloudinary bilgilerini kaynağa enjekte et (build öncesi)
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_UPLOAD_PRESET: ${{ secrets.CLOUDINARY_UPLOAD_PRESET }}
+        run: |
+          if [ -z "$CLOUDINARY_CLOUD_NAME" ]; then
+            echo "::error::CLOUDINARY_CLOUD_NAME secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin."
+            exit 1
+          fi
+          if [ -z "$CLOUDINARY_UPLOAD_PRESET" ]; then
+            echo "::error::CLOUDINARY_UPLOAD_PRESET secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin."
+            exit 1
+          fi
+          if ! grep -q "__CLOUDINARY_CLOUD_NAME__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __CLOUDINARY_CLOUD_NAME__ source/Umitm0dstore.html içinde bulunamadı."
+            exit 1
+          fi
+          if ! grep -q "__CLOUDINARY_UPLOAD_PRESET__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __CLOUDINARY_UPLOAD_PRESET__ source/Umitm0dstore.html içinde bulunamadı."
+            exit 1
+          fi
+          python3 - "$CLOUDINARY_CLOUD_NAME" "$CLOUDINARY_UPLOAD_PRESET" << 'EOF'
+          import sys, io
+          cloud_name = sys.argv[1]
+          upload_preset = sys.argv[2]
+          path = "source/Umitm0dstore.html"
+          with io.open(path, "r", encoding="utf-8") as f:
+              html = f.read()
+          html = html.replace("__CLOUDINARY_CLOUD_NAME__", cloud_name)
+          html = html.replace("__CLOUDINARY_UPLOAD_PRESET__", upload_preset)
+          with io.open(path, "w", encoding="utf-8") as f:
+              f.write(html)
+          EOF
+          echo "✅ Cloudinary bilgileri source/Umitm0dstore.html içine enjekte edildi."
+
       - name: Obfuscate + minify çalıştır
         run: npm run build
 
@@ -102,7 +138,15 @@ jobs:
       - name: Enjeksiyonun build çıktısına geçtiğini doğrula
         run: |
           if grep -q "__TEASER_VIDEO_URL__" dist/Umitstore.html; then
-            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde! Enjeksiyon başarısız olmuş olabilir."
+            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (TEASER_VIDEO_URL)! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          if grep -q "__CLOUDINARY_CLOUD_NAME__" dist/Umitstore.html; then
+            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (CLOUDINARY_CLOUD_NAME)! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          if grep -q "__CLOUDINARY_UPLOAD_PRESET__" dist/Umitstore.html; then
+            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (CLOUDINARY_UPLOAD_PRESET)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
           echo "✅ Doğrulandı: dist/Umitstore.html içinde placeholder kalmamış."
