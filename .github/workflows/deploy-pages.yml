@@ -225,11 +225,11 @@ jobs:
             echo "::warning::FIREBASE_SERVICE_ACCOUNT_JSON secret'ı tanımlı değil, anlık güncelleme push'u atlandı. Eklemek için: Firebase Console > Project Settings > Service accounts > Generate new private key, sonra repo Settings > Secrets and variables > Actions."
             exit 0
           fi
-          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > /tmp/firebase-service-account.json
+          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > firebase-service-account.json
           npm install firebase-admin --no-save --silent
-          cat > /tmp/push-version.js << 'EOF'
+          cat > push-version.js << 'EOF'
           const admin = require('firebase-admin');
-          const serviceAccount = require('/tmp/firebase-service-account.json');
+          const serviceAccount = require('./firebase-service-account.json');
           admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
             databaseURL: 'https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app'
@@ -245,8 +245,8 @@ jobs:
             process.exit(0);
           });
           EOF
-          node /tmp/push-version.js
-          rm -f /tmp/firebase-service-account.json
+          node push-version.js
+          rm -f firebase-service-account.json push-version.js
 
       - name: Enjeksiyonun build çıktısına geçtiğini doğrula
         run: |
