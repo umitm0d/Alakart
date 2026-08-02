@@ -100,6 +100,31 @@ jobs:
           EOF
           echo "✅ Cloudinary bilgileri source/Umitm0dstore.html içine enjekte edildi."
 
+      # ---- APPS_JSON_URL enjeksiyonu (build öncesi, aynı sebepten: obfuscator öncesi) ----
+      - name: Uygulama listesi JSON linkini kaynağa enjekte et (build öncesi)
+        env:
+          APPS_JSON_URL: ${{ secrets.APPS_JSON_URL }}
+        run: |
+          if [ -z "$APPS_JSON_URL" ]; then
+            echo "::error::APPS_JSON_URL secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin."
+            exit 1
+          fi
+          if ! grep -q "__APPS_JSON_URL__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __APPS_JSON_URL__ source/Umitm0dstore.html içinde bulunamadı."
+            exit 1
+          fi
+          python3 - "$APPS_JSON_URL" << 'EOF'
+          import sys, io
+          url = sys.argv[1]
+          path = "source/Umitm0dstore.html"
+          with io.open(path, "r", encoding="utf-8") as f:
+              html = f.read()
+          html = html.replace("__APPS_JSON_URL__", url)
+          with io.open(path, "w", encoding="utf-8") as f:
+              f.write(html)
+          EOF
+          echo "✅ APPS_JSON_URL source/Umitm0dstore.html içine enjekte edildi."
+
       # ---- APP_BUILD_VERSION enjeksiyonu (build öncesi) ----
       # WebView tabanlı uygulama (AppCreator24) sayfayı agresif cache'lediği
       # için, sayfanın kendi içinden periyodik olarak version.json'a bakıp
@@ -154,6 +179,10 @@ jobs:
           fi
           if grep -q "__CLOUDINARY_UPLOAD_PRESET__" dist/Umitstore.html; then
             echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (CLOUDINARY_UPLOAD_PRESET)! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          if grep -q "__APPS_JSON_URL__" dist/Umitstore.html; then
+            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (APPS_JSON_URL)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
           if grep -q "__APP_BUILD_VERSION__" dist/Umitstore.html; then
