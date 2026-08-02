@@ -264,20 +264,51 @@ jobs:
       # ---- Google Cloud kimlik doğrulama (Firebase RTDB REST API için) ----
       # Google, RTDB için eski "database secret" (?auth=SECRET) yöntemini
       # kaldırdı. Artık yetkilendirme bir SERVİS HESABI (service account) JSON
-      # anahtarından üretilen OAuth2 access token ile yapılıyor. Bu adım,
-      # FIREBASE_SERVICE_ACCOUNT_JSON secret'ındaki (Firebase Console >
-      # Project Settings > Service accounts > Generate new private key ile
-      # indirilen JSON dosyasının TAM İÇERİĞİ) anahtardan kısa ömürlü bir
-      # access token üretir. Bu token, admin SDK service account'u olduğu için
-      # RTDB security rules'ı (ör. system/appVersion'daki ".write": false)
-      # normal database secret gibi bypass eder.
-      - name: Google Cloud kimlik doğrulama (Firebase RTDB için)
+      # anahtarından üretilen OAuth2 access token ile yapılıyor.
+      #
+      # NOT: Önce google-github-actions/auth@v2 (token_format: access_token)
+      # denendi, ama bu action token'ı "self-impersonation" ile üretiyor —
+      # yani arka planda IAM Service Account Credentials API'sini çağırıyor.
+      # Bu API projede etkin olmadığı için "403 PERMISSION_DENIED" hatası
+      # alındı. Bunu (ekstra bir Google Cloud API'sini etkinleştirmeye
+      # gerek kalmadan) aşmak için, servis hesabı anahtarından token'ı
+      # DOĞRUDAN (google-auth kütüphanesiyle, standart OAuth2 service-account
+      # akışıyla) üretiyoruz. Bu akış hiçbir ek API gerektirmez, her servis
+      # hesabı anahtarında varsayılan olarak çalışır.
+      - name: Firebase servis hesabından access token üret
         id: gcp_auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-          token_format: 'access_token'
-          access_token_scopes: 'https://www.googleapis.com/auth/firebase.database,https://www.googleapis.com/auth/userinfo.email'
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          pip install --quiet google-auth
+          python3 - << 'EOF'
+          import os, json
+          from google.oauth2 import service_account
+          from google.auth.transport.requests import Request
+
+          raw = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON', '')
+          token = ''
+          if raw.strip():
+              try:
+                  info = json.loads(raw)
+                  creds = service_account.Credentials.from_service_account_info(
+                      info,
+                      scopes=[
+                          'https://www.googleapis.com/auth/firebase.database',
+                          'https://www.googleapis.com/auth/userinfo.email',
+                      ],
+                  )
+                  creds.refresh(Request())
+                  token = creds.token or ''
+              except Exception as e:
+                  print('::warning::Access token üretilemedi: ' + str(e))
+          else:
+              print('::warning::FIREBASE_SERVICE_ACCOUNT_JSON secret\'ı tanımlı değil.')
+
+          gh_output = os.environ.get('GITHUB_OUTPUT')
+          with open(gh_output, 'a') as f:
+              f.write('access_token=' + token + '\n')
+          EOF
 
       # ---- Firebase RTDB'ye anlık (push) sürüm bildirimi ----
       # ÖNEMLİ: Bu adım BİLEREK en sona, "GitHub Pages'e deploy et" adımından
