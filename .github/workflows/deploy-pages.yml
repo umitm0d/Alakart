@@ -226,24 +226,64 @@ jobs:
             exit 0
           fi
           echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > firebase-service-account.json
-          npm install firebase-admin --no-save --silent
           cat > push-version.js << 'EOF'
-          const admin = require('firebase-admin');
-          const serviceAccount = require('./firebase-service-account.json');
-          admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            databaseURL: 'https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app'
-          });
-          admin.database().ref('system/appVersion').set({
-            version: process.env.GITHUB_SHA,
-            ts: Date.now()
-          }).then(() => {
-            console.log('✅ Firebase system/appVersion güncellendi');
+          const crypto = require('crypto');
+          const fs = require('fs');
+
+          const serviceAccount = JSON.parse(fs.readFileSync('firebase-service-account.json', 'utf8'));
+
+          function base64url(input) {
+            return Buffer.from(input).toString('base64')
+              .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+          }
+
+          const header = { alg: 'RS256', typ: 'JWT' };
+          const now = Math.floor(Date.now() / 1000);
+          const claim = {
+            iss: serviceAccount.client_email,
+            scope: 'https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email',
+            aud: 'https://oauth2.googleapis.com/token',
+            iat: now,
+            exp: now + 3600
+          };
+          const unsigned = base64url(JSON.stringify(header)) + '.' + base64url(JSON.stringify(claim));
+          const signer = crypto.createSign('RSA-SHA256');
+          signer.update(unsigned);
+          const signature = signer.sign(serviceAccount.private_key).toString('base64')
+            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+          const jwt = unsigned + '.' + signature;
+
+          (async () => {
+            try {
+              const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=' + encodeURIComponent(jwt)
+              });
+              const tokenData = await tokenRes.json();
+              if (!tokenData.access_token) {
+                console.log('::warning::OAuth token alınamadı: ' + JSON.stringify(tokenData));
+                process.exit(0);
+              }
+              const dbRes = await fetch('https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app/system/appVersion.json', {
+                method: 'PUT',
+                headers: {
+                  'Authorization': 'Bearer ' + tokenData.access_token,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ version: process.env.GITHUB_SHA, ts: Date.now() })
+              });
+              if (dbRes.ok) {
+                console.log('✅ Firebase system/appVersion güncellendi');
+              } else {
+                const text = await dbRes.text();
+                console.log('::warning::Firebase yazma hatası (' + dbRes.status + '): ' + text);
+              }
+            } catch (err) {
+              console.log('::warning::Firebase push hatası: ' + err.message);
+            }
             process.exit(0);
-          }).catch((err) => {
-            console.log('::warning::Firebase yazma hatası: ' + err.message);
-            process.exit(0);
-          });
+          })();
           EOF
           node push-version.js
           rm -f firebase-service-account.json push-version.js
