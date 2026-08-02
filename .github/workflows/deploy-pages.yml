@@ -157,6 +157,20 @@ jobs:
           cp source/sw.js dist/sw.js
           echo "✅ manifest.json ve sw.js (source/sw.js'den) dist/ içine kopyalandı"
 
+      # ---- Uygulama listesi JSON'unu dist'e kopyala (repo'da hiçbir yerde görünmez) ----
+      # source/umitm0d.json sadece PRIVATE repoda yaşıyor, public repoya asla
+      # push edilmiyor. Sadece build sırasında dist/ içine kopyalanıp Pages
+      # sitesiyle birlikte yayınlanıyor — aynı origin'den servis edildiği için
+      # CORS sorunu da hiç yaşanmıyor.
+      - name: Uygulama listesi JSON'unu dist'e kopyala
+        run: |
+          if [ ! -f "source/umitm0d.json" ]; then
+            echo "::error::source/umitm0d.json bulunamadı."
+            exit 1
+          fi
+          cp source/umitm0d.json dist/umitm0d.json
+          echo "✅ source/umitm0d.json dist/ içine kopyalandı"
+
       # ---- version.json üret ----
       # Sayfa içi checkForAppUpdate() bu dosyayı cache: 'no-store' ile
       # okuyup kendi gömülü sürümüyle karşılaştırıyor. Sunucu/CDN sw.js veya
