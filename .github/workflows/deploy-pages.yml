@@ -206,6 +206,35 @@ jobs:
           echo "{\"version\":\"${GITHUB_SHA}\",\"builtAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > dist/version.json
           echo "✅ dist/version.json oluşturuldu"
 
+      # ---- Firebase RTDB'ye anlık (push) sürüm bildirimi ----
+      # Sayfa içindeki listenForAppUpdateRealtime() system/appVersion düğümünü
+      # .on('value', ...) ile canlı dinliyor. Burada o düğümü GITHUB_SHA ile
+      # güncelleyince, o an açık olan tüm sekmeler polling beklemeden anında
+      # (Firebase'in zaten açık olan bağlantısı üzerinden) haberdar oluyor.
+      # FIREBASE_DB_SECRET: Firebase Console > Project Settings > Service accounts >
+      # Database secrets. Bu secret RTDB rules'ı bypass eder, o yüzden
+      # system/appVersion düğümünün ".write" kuralı false olsa bile buradan yazılabilir.
+      # Bilinçli olarak site deploy'unu BLOKLAMIYOR (exit 1 yok): Firebase erişilemez
+      # olsa bile GitHub Pages'e deploy normal şekilde devam etsin, client'lar en
+      # kötü ihtimalle bir sonraki hash/version.json kontrolünde güncellenir.
+      - name: Firebase RTDB'ye sürüm bildir (anlık güncelleme push'u)
+        env:
+          FIREBASE_DB_SECRET: ${{ secrets.FIREBASE_DB_SECRET }}
+        run: |
+          if [ -z "$FIREBASE_DB_SECRET" ]; then
+            echo "::warning::FIREBASE_DB_SECRET secret'ı tanımlı değil, anlık güncelleme push'u atlandı. Eklemek için: Firebase Console > Project Settings > Service accounts > Database secrets, sonra repo Settings > Secrets and variables > Actions."
+            exit 0
+          fi
+          HTTP_CODE=$(curl -s -o /tmp/firebase_response.json -w "%{http_code}" -X PUT \
+            "https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app/system/appVersion.json?auth=${FIREBASE_DB_SECRET}" \
+            -d "{\"version\":\"${GITHUB_SHA}\",\"ts\":$(date +%s)000}")
+          cat /tmp/firebase_response.json
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::warning::Firebase RTDB'ye sürüm yazılamadı (HTTP ${HTTP_CODE}). Deploy yine de devam ediyor; client'lar en kötü ihtimalle hash/version.json kontrolünde güncellenir."
+            exit 0
+          fi
+          echo "✅ Firebase system/appVersion güncellendi (${GITHUB_SHA})"
+
       - name: Enjeksiyonun build çıktısına geçtiğini doğrula
         run: |
           if grep -q "__TEASER_VIDEO_URL__" dist/Umitstore.html; then
