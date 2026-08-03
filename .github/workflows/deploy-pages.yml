@@ -226,31 +226,31 @@ jobs:
 
       - name: Enjeksiyonun build çıktısına geçtiğini doğrula
         run: |
-          if grep -q "__TEASER_VIDEO_URL__" dist/Umitstore.html; then
-            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (TEASER_VIDEO_URL)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__TEASER_VIDEO_URL__" dist/UmitStoreForum.html; then
+            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (TEASER_VIDEO_URL)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__CLOUDINARY_CLOUD_NAME__" dist/Umitstore.html; then
-            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (CLOUDINARY_CLOUD_NAME)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__CLOUDINARY_CLOUD_NAME__" dist/UmitStoreForum.html; then
+            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (CLOUDINARY_CLOUD_NAME)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__CLOUDINARY_UPLOAD_PRESET__" dist/Umitstore.html; then
-            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (CLOUDINARY_UPLOAD_PRESET)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__CLOUDINARY_UPLOAD_PRESET__" dist/UmitStoreForum.html; then
+            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (CLOUDINARY_UPLOAD_PRESET)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__APPS_JSON_URL__" dist/Umitstore.html; then
-            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (APPS_JSON_URL)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__APPS_JSON_URL__" dist/UmitStoreForum.html; then
+            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (APPS_JSON_URL)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__APP_BUILD_VERSION__" dist/Umitstore.html; then
-            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (APP_BUILD_VERSION)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__APP_BUILD_VERSION__" dist/UmitStoreForum.html; then
+            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (APP_BUILD_VERSION)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__FORUM_PUSH_WORKER_URL__" dist/Umitstore.html; then
-            echo "::error::Placeholder hâlâ dist/Umitstore.html içinde (FORUM_PUSH_WORKER_URL)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__FORUM_PUSH_WORKER_URL__" dist/UmitStoreForum.html; then
+            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (FORUM_PUSH_WORKER_URL)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          echo "✅ Doğrulandı: dist/Umitstore.html içinde placeholder kalmamış."
+          echo "✅ Doğrulandı: dist/UmitStoreForum.html içinde placeholder kalmamış."
 
       - name: Pages artifact'ini hazırla
         uses: actions/upload-pages-artifact@v3
