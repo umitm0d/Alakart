@@ -424,30 +424,66 @@ jobs:
               print('source/umitm0d.json okunamadı:', e)
               apps = []
 
-          new_apps = [a for a in apps if a.get('new') is True and a.get('id')]
-          if not new_apps:
-              print('Yeni ("new":true) işaretli mod yok, bildirim atlanıyor.')
+          # ARTIK "new" alanına hiç bakmıyoruz — o alan sadece sayfa tarafında
+          # ürün kartında "YENİ" rozetinin birkaç gün görünmesi için kullanılıyor,
+          # bildirim kararıyla bağımsız. Bildirim kararı sadece şuna bakıyor:
+          # - id daha önce hiç görülmemiş (yeni mod eklenmiş), VEYA
+          # - id daha önce görülmüş AMA timestamp değişmiş (mod güncellenmiş)
+          # Bu sayede admin "new" alanını false'a çekmeyi unutsa/geciktirse bile
+          # aynı mod için tekrar tekrar bildirim gitmiyor; sadece gerçekten
+          # timestamp'i değişen (yani bilinçli güncellenen) modlar bildirim alıyor.
+          candidate_apps = [a for a in apps if a.get('id')]
+          if not candidate_apps:
+              print('JSON içinde id\'li mod yok, bildirim atlanıyor.')
           else:
               already = rtdb_get('/notifiedNewApps') or {}
-              for app in new_apps:
+
+              # TEK SEFERLİK GÖÇ KORUMASI: notifiedNewApps'te HİÇ kaydı olmayan
+              # (yani bu yeni id+timestamp mantığından önce hiç işlenmemiş) id'ler
+              # için, direkt bildirim atmak yerine önce sessizce "görülmüş" olarak
+              # kaydediyoruz. Böylece id 1-13 gibi yıllardır JSON'da duran, hiç
+              # değişmemiş eski modlar bu güncelleme yüzünden topluca bildirim
+              # göndermiyor. Bundan sonra sadece GERÇEKTEN timestamp'i değişen
+              # modlar bildirim alacak.
+              missing_ids = [str(a['id']) for a in candidate_apps if str(a['id']) not in already]
+              if missing_ids:
+                  print('ℹ️ İlk kez görülen (kaydı olmayan) id\'ler bildirim atılmadan kaydediliyor: ' + ', '.join(missing_ids))
+                  for app in candidate_apps:
+                      app_id = str(app['id'])
+                      if app_id not in missing_ids:
+                          continue
+                      app_timestamp = str(app.get('timestamp') or '')
+                      try:
+                          rtdb_put('/notifiedNewApps/' + app_id, {
+                              'timestamp': app_timestamp,
+                              'notifiedAt': int(time.time() * 1000),
+                              'backfilled': True
+                          })
+                      except Exception as e:
+                          print('notifiedNewApps backfill yazılamadı (' + app_id + '):', e)
+                  already = rtdb_get('/notifiedNewApps') or {}
+
+              for app in candidate_apps:
                   app_id = str(app['id'])
                   app_timestamp = str(app.get('timestamp') or '')
 
                   prev = already.get(app_id)
-                  # Geriye dönük uyumluluk: eski kayıtlar sadece "True" (bool) olarak
-                  # yazılmıştı (timestamp bilgisi yoktu). Böyle bir kayıt varsa ve
-                  # elimizdeki mod'un timestamp'i yoksa, eski davranışla aynı şekilde
-                  # atla (tekrar bildirim gitmesin). Ama timestamp varsa ve eski kayıttan
-                  # farklıysa (gerçek bir güncelleme yapılmış demektir), yine bildirim at.
                   if prev is not None:
                       if isinstance(prev, dict):
                           prev_timestamp = str(prev.get('timestamp') or '')
                       else:
-                          # eski format: prev == True, timestamp bilgisi yok
-                          prev_timestamp = ''
+                          # eski format: prev == True, timestamp bilgisi yok.
+                          # Bu durumda elimizde karşılaştıracak bir şey yok; bir daha
+                          # bildirim atmıyoruz (ilk göç bu şekilde sorunsuz yapılmış olur).
+                          prev_timestamp = None
+
+                      if prev_timestamp is None:
+                          continue
                       if not app_timestamp or app_timestamp == prev_timestamp:
                           continue
                       print('🔄 Mod güncellenmiş (timestamp değişti), yeniden bildirim gönderiliyor: ' + app_id)
+                  else:
+                      print('🆕 Daha önce görülmemiş id, bildirim gönderiliyor: ' + app_id)
 
                   name = app.get('name', 'Yeni Mod')
                   # Worker zaten broadcast bildirimlerinin başına "📢 " ekliyor,
