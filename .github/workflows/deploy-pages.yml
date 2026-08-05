@@ -354,3 +354,115 @@ jobs:
             exit 0
           fi
           echo "✅ Firebase system/appVersion güncellendi (${SOURCE_SHA}) — deploy zaten tamamlandı, site canlı."
+
+      # ---- YENİ: Yeni eklenen modlar için gerçek (arka planda da çalışan) push bildirimi ----
+      # SORUN: source/umitm0d.json içinde "new": true işaretli bir mod eklendiğinde,
+      # PWA'da bildirim SADECE sayfa açıkken ve ikinci bir fetchNotifications() turunda
+      # (Notification API ile, yerel/foreground) görünüyordu — çünkü notificationData
+      # her sayfa yüklemesinde sıfırdan başlıyor ve app.new karşılaştırması hafızada
+      # tutuluyor, Firebase/FCM'e hiç dokunmuyordu. Uygulama kapalıyken veya arka
+      # plandayken (yani asıl "bildirim" beklenen durumda) HİÇBİR şey gitmiyordu.
+      # ÇÖZÜM: forum/comment/rating'de zaten çalışan gerçek FCM push hattını (Worker +
+      # broadcastFeed) burada da kullan. Client tarafında admin panelinden broadcast
+      # atıldığında yapılan işin AYNISINI (broadcasts/{key} yaz + Worker'ı feedType=
+      # broadcastFeed ile tetikle) deploy sırasında, "new" işaretli her mod için BİR
+      # KEZ otomatik yapıyoruz. notifiedNewApps/{appId} düğümü, aynı mod için build'den
+      # build'e tekrar tekrar bildirim gitmesini engelliyor (kalıcı "gönderildi" kaydı).
+      # Bilinçli olarak job'u BLOKLAMIYOR: Firebase/Worker erişilemezse bildirim o build'de
+      # atlanır, bir sonraki build'de (mod hâlâ "new":true ise) tekrar denenir.
+      - name: Yeni eklenen modlar için push bildirimi gönder (broadcastFeed üzerinden)
+        env:
+          ACCESS_TOKEN: ${{ steps.gcp_auth.outputs.access_token }}
+          FORUM_PUSH_WORKER_URL: ${{ secrets.FORUM_PUSH_WORKER_URL }}
+        run: |
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "::warning::Access token yok, yeni mod bildirimi atlandı."
+            exit 0
+          fi
+          if [ -z "$FORUM_PUSH_WORKER_URL" ]; then
+            echo "::warning::FORUM_PUSH_WORKER_URL tanımlı değil, yeni mod bildirimi atlandı."
+            exit 0
+          fi
+          python3 - << 'EOF'
+          import os, json, time, urllib.request
+
+          ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN', '')
+          WORKER_URL = os.environ.get('FORUM_PUSH_WORKER_URL', '')
+          DB_BASE = 'https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app'
+
+          def rtdb_get(path):
+              req = urllib.request.Request(DB_BASE + path + '.json',
+                                            headers={'Authorization': 'Bearer ' + ACCESS_TOKEN})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      data = r.read()
+                      return json.loads(data) if data and data != b'null' else None
+              except Exception as e:
+                  print('RTDB GET hata (' + path + '):', e)
+                  return None
+
+          def rtdb_put(path, payload):
+              body = json.dumps(payload).encode('utf-8')
+              req = urllib.request.Request(DB_BASE + path + '.json', data=body, method='PUT',
+                                            headers={'Authorization': 'Bearer ' + ACCESS_TOKEN,
+                                                     'Content-Type': 'application/json'})
+              with urllib.request.urlopen(req) as r:
+                  return r.read()
+
+          def rtdb_post(path, payload):
+              body = json.dumps(payload).encode('utf-8')
+              req = urllib.request.Request(DB_BASE + path + '.json', data=body, method='POST',
+                                            headers={'Authorization': 'Bearer ' + ACCESS_TOKEN,
+                                                     'Content-Type': 'application/json'})
+              with urllib.request.urlopen(req) as r:
+                  return json.loads(r.read())
+
+          try:
+              with open('source/umitm0d.json', 'r', encoding='utf-8') as f:
+                  apps = json.load(f)
+          except Exception as e:
+              print('source/umitm0d.json okunamadı:', e)
+              apps = []
+
+          new_apps = [a for a in apps if a.get('new') is True and a.get('id')]
+          if not new_apps:
+              print('Yeni ("new":true) işaretli mod yok, bildirim atlanıyor.')
+          else:
+              already = rtdb_get('/notifiedNewApps') or {}
+              for app in new_apps:
+                  app_id = str(app['id'])
+                  if app_id in already:
+                      continue
+                  name = app.get('name', 'Yeni Mod')
+                  # Worker zaten broadcast bildirimlerinin başına "📢 " ekliyor,
+                  # burada tekrar emoji eklemiyoruz (bkz. orjinalworkers-1.js: broadcastFeed).
+                  broadcast = {
+                      'title': 'Yeni Mod Eklendi',
+                      'message': name,
+                      'uid': None,
+                      'ts': int(time.time() * 1000)
+                  }
+                  try:
+                      res = rtdb_post('/broadcasts', broadcast)
+                  except Exception as e:
+                      print('broadcasts yazılamadı (' + app_id + '):', e)
+                      continue
+                  push_key = res.get('name') if isinstance(res, dict) else None
+                  if not push_key:
+                      print('broadcasts push key alınamadı:', app_id)
+                      continue
+                  worker_body = json.dumps({'feedType': 'broadcastFeed', 'feedId': push_key}).encode('utf-8')
+                  wreq = urllib.request.Request(WORKER_URL, data=worker_body, method='POST',
+                                                 headers={'Content-Type': 'application/json'})
+                  try:
+                      with urllib.request.urlopen(wreq) as wr:
+                          print('Worker yanıtı (' + app_id + '):', wr.status)
+                  except Exception as e:
+                      print('Worker çağrısı hata (' + app_id + '):', e)
+                      continue
+                  try:
+                      rtdb_put('/notifiedNewApps/' + app_id, True)
+                  except Exception as e:
+                      print('notifiedNewApps yazılamadı (' + app_id + '):', e)
+                  print('✅ Yeni mod bildirimi gönderildi: ' + name)
+          EOF
