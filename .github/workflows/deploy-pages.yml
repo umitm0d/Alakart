@@ -431,8 +431,24 @@ jobs:
               already = rtdb_get('/notifiedNewApps') or {}
               for app in new_apps:
                   app_id = str(app['id'])
-                  if app_id in already:
-                      continue
+                  app_timestamp = str(app.get('timestamp') or '')
+
+                  prev = already.get(app_id)
+                  # Geriye dönük uyumluluk: eski kayıtlar sadece "True" (bool) olarak
+                  # yazılmıştı (timestamp bilgisi yoktu). Böyle bir kayıt varsa ve
+                  # elimizdeki mod'un timestamp'i yoksa, eski davranışla aynı şekilde
+                  # atla (tekrar bildirim gitmesin). Ama timestamp varsa ve eski kayıttan
+                  # farklıysa (gerçek bir güncelleme yapılmış demektir), yine bildirim at.
+                  if prev is not None:
+                      if isinstance(prev, dict):
+                          prev_timestamp = str(prev.get('timestamp') or '')
+                      else:
+                          # eski format: prev == True, timestamp bilgisi yok
+                          prev_timestamp = ''
+                      if not app_timestamp or app_timestamp == prev_timestamp:
+                          continue
+                      print('🔄 Mod güncellenmiş (timestamp değişti), yeniden bildirim gönderiliyor: ' + app_id)
+
                   name = app.get('name', 'Yeni Mod')
                   # Worker zaten broadcast bildirimlerinin başına "📢 " ekliyor,
                   # burada tekrar emoji eklemiyoruz (bkz. orjinalworkers-1.js: broadcastFeed).
@@ -483,7 +499,13 @@ jobs:
                       print('Worker çağrısı hata (' + app_id + '):', e)
                       continue
                   try:
-                      rtdb_put('/notifiedNewApps/' + app_id, True)
+                      # Artık sadece True değil, id'nin bildirildiği anki timestamp'i de
+                      # saklıyoruz ki bir sonraki deploy'da "aynı mod mu, yoksa güncellenmiş
+                      # (yeni timestamp'li) bir versiyon mu" ayrımını yapabilelim.
+                      rtdb_put('/notifiedNewApps/' + app_id, {
+                          'timestamp': app_timestamp,
+                          'notifiedAt': int(time.time() * 1000)
+                      })
                   except Exception as e:
                       print('notifiedNewApps yazılamadı (' + app_id + '):', e)
                   print('✅ Yeni mod bildirimi gönderildi: ' + name)
