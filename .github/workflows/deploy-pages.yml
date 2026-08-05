@@ -417,6 +417,21 @@ jobs:
               with urllib.request.urlopen(req) as r:
                   return json.loads(r.read())
 
+          def as_dict(value):
+              # Firebase RTDB, anahtarları ardışık sayısal (0,1,2,...) olan bir
+              # düğümü otomatik olarak JSON ARRAY olarak döndürür, dict değil.
+              # notifiedNewApps'teki id'ler (1,2,3...) tam bu duruma denk geldiği
+              # için already bazen list, bazen dict dönebiliyor. Burada her
+              # durumda index/anahtarı STRING id'ye çevirip normal bir dict'e
+              # dönüştürüyoruz ki .get(app_id) her zaman güvenle çalışsın.
+              if value is None:
+                  return {}
+              if isinstance(value, dict):
+                  return value
+              if isinstance(value, list):
+                  return {str(i): v for i, v in enumerate(value) if v is not None}
+              return {}
+
           try:
               with open('source/umitm0d.json', 'r', encoding='utf-8') as f:
                   apps = json.load(f)
@@ -436,7 +451,7 @@ jobs:
           if not candidate_apps:
               print('JSON içinde id\'li mod yok, bildirim atlanıyor.')
           else:
-              already = rtdb_get('/notifiedNewApps') or {}
+              already = as_dict(rtdb_get('/notifiedNewApps'))
 
               # TEK SEFERLİK GÖÇ KORUMASI: notifiedNewApps'te HİÇ kaydı olmayan
               # (yani bu yeni id+timestamp mantığından önce hiç işlenmemiş) id'ler
@@ -461,7 +476,7 @@ jobs:
                           })
                       except Exception as e:
                           print('notifiedNewApps backfill yazılamadı (' + app_id + '):', e)
-                  already = rtdb_get('/notifiedNewApps') or {}
+                  already = as_dict(rtdb_get('/notifiedNewApps'))
 
               for app in candidate_apps:
                   app_id = str(app['id'])
