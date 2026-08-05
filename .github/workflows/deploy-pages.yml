@@ -462,7 +462,10 @@ jobs:
                   # deploy pipeline'ımızdan, kendi sitemiz adına çağırıyoruz.
                   wreq = urllib.request.Request(WORKER_URL, data=worker_body, method='POST',
                                                  headers={'Content-Type': 'application/json',
-                                                          'Origin': 'https://umitm0d.github.io'})
+                                                          'Origin': 'https://umitm0d.github.io',
+                                                          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                                                          'Accept': 'application/json',
+                                                          'Referer': 'https://umitm0d.github.io/'})
                   try:
                       with urllib.request.urlopen(wreq) as wr:
                           print('Worker yanıtı (' + app_id + '):', wr.status)
