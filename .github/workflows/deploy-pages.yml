@@ -466,6 +466,16 @@ jobs:
                   try:
                       with urllib.request.urlopen(wreq) as wr:
                           print('Worker yanıtı (' + app_id + '):', wr.status)
+                  except urllib.error.HTTPError as e:
+                      body = ''
+                      try:
+                          body = e.read().decode('utf-8', errors='replace')
+                      except Exception:
+                          pass
+                      print('Worker çağrısı hata (' + app_id + '):', e.code, e.reason)
+                      print('Worker hata gövdesi (' + app_id + '):', body)
+                      print('Worker hata header\'ları (' + app_id + '):', dict(e.headers) if e.headers else {})
+                      continue
                   except Exception as e:
                       print('Worker çağrısı hata (' + app_id + '):', e)
                       continue
