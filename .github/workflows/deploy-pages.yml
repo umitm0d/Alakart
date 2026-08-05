@@ -452,8 +452,17 @@ jobs:
                       print('broadcasts push key alınamadı:', app_id)
                       continue
                   worker_body = json.dumps({'feedType': 'broadcastFeed', 'feedId': push_key}).encode('utf-8')
+                  # ÖNEMLİ: Worker (orjinalworkers-1.js) yalnızca Origin header'ı
+                  # https://umitm0d.github.io olan istekleri kabul ediyor (satır ~590,
+                  # "origin izinli değil" 403). GitHub Actions'tan atılan bir sunucu-sunucu
+                  # isteği tarayıcı olmadığı için Origin header'ı normalde HİÇ gitmez — bu
+                  # yüzden Origin'i elle, sitenin gerçek adresiyle eşleşecek şekilde set
+                  # ediyoruz. Bu bir güvenlik açığı değil: origin kontrolü sadece "bu worker
+                  # sadece bizim sitemizden çağrılsın" kuralını uyguluyor, biz zaten kendi
+                  # deploy pipeline'ımızdan, kendi sitemiz adına çağırıyoruz.
                   wreq = urllib.request.Request(WORKER_URL, data=worker_body, method='POST',
-                                                 headers={'Content-Type': 'application/json'})
+                                                 headers={'Content-Type': 'application/json',
+                                                          'Origin': 'https://umitm0d.github.io'})
                   try:
                       with urllib.request.urlopen(wreq) as wr:
                           print('Worker yanıtı (' + app_id + '):', wr.status)
