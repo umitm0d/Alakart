@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -27,13 +27,6 @@ jobs:
           repository: umitm0d/Alakart-source
           token: ${{ secrets.PRIVATE_REPO_PAT }}
 
-      # ---- KRİTİK DÜZELTME ----
-      # ${{ github.sha }} / $GITHUB_SHA, workflow'un YAŞADIĞI repo'nun (public Alakart)
-      # SHA'sını verir; yukarıda checkout edilen PRIVATE repo'nun (Alakart-source) SHA'sını
-      # DEĞİL. Alakart reposuna hiç push yapılmadığı için bu değer build'den build'e HİÇ
-      # değişmiyordu — bu yüzden version.json/Firebase her zaman aynı "sürümü" bildiriyor
-      # ve client asla güncelleme farkı görmüyordu. Çözüm: checkout SONRASI, artık çalışma
-      # dizininde bulunan private repo'nun gerçek HEAD SHA'sını git'ten okuyup onu kullan.
       - name: Gerçek kaynak (private repo) commit SHA'sını yakala
         id: source_sha
         run: |
@@ -49,7 +42,6 @@ jobs:
       - name: Bağımlılıkları yükle
         run: npm install
 
-      # ---- Teaser video linkini KAYNAK dosyaya (source/), OBFUSCATE'DEN ÖNCE enjekte et ----
       - name: Teaser video linkini kaynağa enjekte et (build öncesi)
         env:
           TEASER_VIDEO_URL: ${{ secrets.TEASER_VIDEO_URL }}
@@ -78,7 +70,6 @@ jobs:
           EOF
           echo "✅ Teaser video linki source/Umitm0dstore.html içine enjekte edildi (build henüz çalışmadı, bu dosya commit edilmeyecek)."
 
-      # ---- Cloudinary cloud name / upload preset enjeksiyonu (build öncesi, aynı sebepten: obfuscator öncesi) ----
       - name: Cloudinary bilgilerini kaynağa enjekte et (build öncesi)
         env:
           CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
@@ -114,7 +105,6 @@ jobs:
           EOF
           echo "✅ Cloudinary bilgileri source/Umitm0dstore.html içine enjekte edildi."
 
-      # ---- APPS_JSON_URL enjeksiyonu (build öncesi, aynı sebepten: obfuscator öncesi) ----
       - name: Uygulama listesi JSON linkini kaynağa enjekte et (build öncesi)
         env:
           APPS_JSON_URL: ${{ secrets.APPS_JSON_URL }}
@@ -139,7 +129,6 @@ jobs:
           EOF
           echo "✅ APPS_JSON_URL source/Umitm0dstore.html içine enjekte edildi."
 
-      # ---- FORUM_PUSH_WORKER_URL enjeksiyonu (build öncesi, aynı sebepten: obfuscator öncesi) ----
       - name: Forum push worker adresini kaynağa enjekte et (build öncesi)
         env:
           FORUM_PUSH_WORKER_URL: ${{ secrets.FORUM_PUSH_WORKER_URL }}
@@ -164,11 +153,6 @@ jobs:
           EOF
           echo "✅ FORUM_PUSH_WORKER_URL source/Umitm0dstore.html içine enjekte edildi."
 
-      # ---- APP_BUILD_VERSION enjeksiyonu (build öncesi) ----
-      # WebView tabanlı uygulama (AppCreator24) sayfayı agresif cache'lediği
-      # için, sayfanın kendi içinden periyodik olarak version.json'a bakıp
-      # sürüm farkı varsa kendini zorla yenilemesi lazım. Bu adım o kontrolün
-      # karşılaştıracağı sürüm değerini (commit SHA) kaynağa gömüyor.
       - name: Uygulama sürümünü kaynağa enjekte et (build öncesi)
         run: |
           if ! grep -q "__APP_BUILD_VERSION__" source/Umitm0dstore.html; then
@@ -183,7 +167,6 @@ jobs:
       - name: Obfuscate + minify çalıştır
         run: npm run build
 
-      # ---- KRİTİK: manifest.json ve sw.js dosyaları dist/ içine kopyalanmıyordu ----
       - name: Statik dosyaları (manifest.json, sw.js) dist'e kopyala
         run: |
           if [ ! -f "manifest.json" ]; then
@@ -198,11 +181,6 @@ jobs:
           cp source/sw.js dist/sw.js
           echo "✅ manifest.json ve sw.js (source/sw.js'den) dist/ içine kopyalandı"
 
-      # ---- Uygulama listesi JSON'unu dist'e kopyala (repo'da hiçbir yerde görünmez) ----
-      # source/umitm0d.json sadece PRIVATE repoda yaşıyor, public repoya asla
-      # push edilmiyor. Sadece build sırasında dist/ içine kopyalanıp Pages
-      # sitesiyle birlikte yayınlanıyor — aynı origin'den servis edildiği için
-      # CORS sorunu da hiç yaşanmıyor.
       - name: Uygulama listesi JSON'unu dist'e kopyala
         run: |
           if [ ! -f "source/umitm0d.json" ]; then
@@ -212,11 +190,6 @@ jobs:
           cp source/umitm0d.json dist/umitm0d.json
           echo "✅ source/umitm0d.json dist/ içine kopyalandı"
 
-      # ---- version.json üret ----
-      # Sayfa içi checkForAppUpdate() bu dosyayı cache: 'no-store' ile
-      # okuyup kendi gömülü sürümüyle karşılaştırıyor. Sunucu/CDN sw.js veya
-      # ana HTML'i cache'lese bile bu dosya küçük olduğu ve her build'de
-      # içeriği değiştiği için güncelliği güvenilir şekilde tespit ediyor.
       - name: version.json oluştur
         run: |
           echo "{\"version\":\"${SOURCE_SHA}\",\"builtAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > dist/version.json
@@ -261,20 +234,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # ---- Google Cloud kimlik doğrulama (Firebase RTDB REST API için) ----
-      # Google, RTDB için eski "database secret" (?auth=SECRET) yöntemini
-      # kaldırdı. Artık yetkilendirme bir SERVİS HESABI (service account) JSON
-      # anahtarından üretilen OAuth2 access token ile yapılıyor.
-      #
-      # NOT: Önce google-github-actions/auth@v2 (token_format: access_token)
-      # denendi, ama bu action token'ı "self-impersonation" ile üretiyor —
-      # yani arka planda IAM Service Account Credentials API'sini çağırıyor.
-      # Bu API projede etkin olmadığı için "403 PERMISSION_DENIED" hatası
-      # alındı. Bunu (ekstra bir Google Cloud API'sini etkinleştirmeye
-      # gerek kalmadan) aşmak için, servis hesabı anahtarından token'ı
-      # DOĞRUDAN (google-auth kütüphanesiyle, standart OAuth2 service-account
-      # akışıyla) üretiyoruz. Bu akış hiçbir ek API gerektirmez, her servis
-      # hesabı anahtarında varsayılan olarak çalışır.
       - name: Firebase servis hesabından access token üret
         id: gcp_auth
         env:
@@ -310,34 +269,11 @@ jobs:
               f.write('access_token=' + token + '\n')
           EOF
 
-      # ---- Firebase RTDB'ye anlık (push) sürüm bildirimi ----
-      # ÖNEMLİ: Bu adım BİLEREK en sona, "GitHub Pages'e deploy et" adımından
-      # SONRAYA taşındı. Önceki sürümde bu adım deploy'dan ÖNCE çalışıyordu:
-      # Firebase'e "yeni sürüm var" bildirimi site fiilen yayına girmeden önce
-      # gidiyordu. Sonuç, gerçek bir örnekte gözlendi: telefondaki debug log'da
-      # uygulama Firebase bildirimini alır almaz kendini yeniledi, ama sunucudan
-      # hâlâ ESKİ dosya geldiği için sayfa yeniden yüklendikten sonra da "fark
-      # var" görmeye devam etti; uygulama arka arkaya 2 kez otomatik yenileme
-      # denedi, sonra döngüye girmemek için 20 saniyelik guard devreye girip
-      # otomatik yenilemeyi durdurdu ("sayfayı elle yenile" mesajı).
-      # Şimdi Firebase bildirimi sadece deploy GERÇEKTEN tamamlandıktan sonra
-      # gönderiliyor, böylece client bildirimi aldığı anda sunucudan çektiği
-      # sayfa da gerçekten güncel oluyor.
-      # Sayfa içindeki listenForAppUpdateRealtime() system/appVersion düğümünü
-      # .on('value', ...) ile canlı dinliyor. Burada o düğümü güncelleyince, o an
-      # açık olan tüm sekmeler polling beklemeden anında (Firebase'in zaten açık
-      # olan bağlantısı üzerinden) haberdar oluyor.
-      # Bilinçli olarak job'u BLOKLAMIYOR (exit 1 yok): Firebase erişilemez olsa
-      # bile deploy zaten tamamlanmış durumda; client'lar en kötü ihtimalle bir
-      # sonraki 15sn'lik version.json polling turunda güncellenir.
       - name: Firebase RTDB'ye sürüm bildir (anlık güncelleme push'u, deploy SONRASI)
         env:
           ACCESS_TOKEN: ${{ steps.gcp_auth.outputs.access_token }}
           SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
         run: |
-          # Ekstra güvenlik payı: deploy-pages@v4 "başarılı" dese bile GitHub'ın
-          # global CDN'i her uç noktaya yayılmayı birkaç saniye daha sürdürebilir.
-          # Firebase bildirimini bu küçük payı bekleyerek gönderiyoruz.
           echo "CDN'in tam yayılması için 15 sn bekleniyor..."
           sleep 15
           if [ -z "$ACCESS_TOKEN" ]; then
@@ -355,21 +291,6 @@ jobs:
           fi
           echo "✅ Firebase system/appVersion güncellendi (${SOURCE_SHA}) — deploy zaten tamamlandı, site canlı."
 
-      # ---- YENİ: Yeni eklenen modlar için gerçek (arka planda da çalışan) push bildirimi ----
-      # SORUN: source/umitm0d.json içinde "new": true işaretli bir mod eklendiğinde,
-      # PWA'da bildirim SADECE sayfa açıkken ve ikinci bir fetchNotifications() turunda
-      # (Notification API ile, yerel/foreground) görünüyordu — çünkü notificationData
-      # her sayfa yüklemesinde sıfırdan başlıyor ve app.new karşılaştırması hafızada
-      # tutuluyor, Firebase/FCM'e hiç dokunmuyordu. Uygulama kapalıyken veya arka
-      # plandayken (yani asıl "bildirim" beklenen durumda) HİÇBİR şey gitmiyordu.
-      # ÇÖZÜM: forum/comment/rating'de zaten çalışan gerçek FCM push hattını (Worker +
-      # broadcastFeed) burada da kullan. Client tarafında admin panelinden broadcast
-      # atıldığında yapılan işin AYNISINI (broadcasts/{key} yaz + Worker'ı feedType=
-      # broadcastFeed ile tetikle) deploy sırasında, "new" işaretli her mod için BİR
-      # KEZ otomatik yapıyoruz. notifiedNewApps/{appId} düğümü, aynı mod için build'den
-      # build'e tekrar tekrar bildirim gitmesini engelliyor (kalıcı "gönderildi" kaydı).
-      # Bilinçli olarak job'u BLOKLAMIYOR: Firebase/Worker erişilemezse bildirim o build'de
-      # atlanır, bir sonraki build'de (mod hâlâ "new":true ise) tekrar denenir.
       - name: Yeni eklenen modlar için push bildirimi gönder (broadcastFeed üzerinden)
         env:
           ACCESS_TOKEN: ${{ steps.gcp_auth.outputs.access_token }}
@@ -418,12 +339,6 @@ jobs:
                   return json.loads(r.read())
 
           def as_dict(value):
-              # Firebase RTDB, anahtarları ardışık sayısal (0,1,2,...) olan bir
-              # düğümü otomatik olarak JSON ARRAY olarak döndürür, dict değil.
-              # notifiedNewApps'teki id'ler (1,2,3...) tam bu duruma denk geldiği
-              # için already bazen list, bazen dict dönebiliyor. Burada her
-              # durumda index/anahtarı STRING id'ye çevirip normal bir dict'e
-              # dönüştürüyoruz ki .get(app_id) her zaman güvenle çalışsın.
               if value is None:
                   return {}
               if isinstance(value, dict):
@@ -439,27 +354,12 @@ jobs:
               print('source/umitm0d.json okunamadı:', e)
               apps = []
 
-          # ARTIK "new" alanına hiç bakmıyoruz — o alan sadece sayfa tarafında
-          # ürün kartında "YENİ" rozetinin birkaç gün görünmesi için kullanılıyor,
-          # bildirim kararıyla bağımsız. Bildirim kararı sadece şuna bakıyor:
-          # - id daha önce hiç görülmemiş (yeni mod eklenmiş), VEYA
-          # - id daha önce görülmüş AMA timestamp değişmiş (mod güncellenmiş)
-          # Bu sayede admin "new" alanını false'a çekmeyi unutsa/geciktirse bile
-          # aynı mod için tekrar tekrar bildirim gitmiyor; sadece gerçekten
-          # timestamp'i değişen (yani bilinçli güncellenen) modlar bildirim alıyor.
           candidate_apps = [a for a in apps if a.get('id')]
           if not candidate_apps:
               print('JSON içinde id\'li mod yok, bildirim atlanıyor.')
           else:
               already = as_dict(rtdb_get('/notifiedNewApps'))
 
-              # TEK SEFERLİK GÖÇ KORUMASI: notifiedNewApps'te HİÇ kaydı olmayan
-              # (yani bu yeni id+timestamp mantığından önce hiç işlenmemiş) id'ler
-              # için, direkt bildirim atmak yerine önce sessizce "görülmüş" olarak
-              # kaydediyoruz. Böylece id 1-13 gibi yıllardır JSON'da duran, hiç
-              # değişmemiş eski modlar bu güncelleme yüzünden topluca bildirim
-              # göndermiyor. Bundan sonra sadece GERÇEKTEN timestamp'i değişen
-              # modlar bildirim alacak.
               missing_ids = [str(a['id']) for a in candidate_apps if str(a['id']) not in already]
               if missing_ids:
                   print('ℹ️ İlk kez görülen (kaydı olmayan) id\'ler bildirim atılmadan kaydediliyor: ' + ', '.join(missing_ids))
@@ -487,9 +387,6 @@ jobs:
                       if isinstance(prev, dict):
                           prev_timestamp = str(prev.get('timestamp') or '')
                       else:
-                          # eski format: prev == True, timestamp bilgisi yok.
-                          # Bu durumda elimizde karşılaştıracak bir şey yok; bir daha
-                          # bildirim atmıyoruz (ilk göç bu şekilde sorunsuz yapılmış olur).
                           prev_timestamp = None
 
                       if prev_timestamp is None:
@@ -501,8 +398,6 @@ jobs:
                       print('🆕 Daha önce görülmemiş id, bildirim gönderiliyor: ' + app_id)
 
                   name = app.get('name', 'Yeni Mod')
-                  # Worker zaten broadcast bildirimlerinin başına "📢 " ekliyor,
-                  # burada tekrar emoji eklemiyoruz (bkz. orjinalworkers-1.js: broadcastFeed).
                   broadcast = {
                       'title': 'Yeni Mod Eklendi',
                       'message': name,
@@ -519,14 +414,6 @@ jobs:
                       print('broadcasts push key alınamadı:', app_id)
                       continue
                   worker_body = json.dumps({'feedType': 'broadcastFeed', 'feedId': push_key}).encode('utf-8')
-                  # ÖNEMLİ: Worker (orjinalworkers-1.js) yalnızca Origin header'ı
-                  # https://umitm0d.github.io olan istekleri kabul ediyor (satır ~590,
-                  # "origin izinli değil" 403). GitHub Actions'tan atılan bir sunucu-sunucu
-                  # isteği tarayıcı olmadığı için Origin header'ı normalde HİÇ gitmez — bu
-                  # yüzden Origin'i elle, sitenin gerçek adresiyle eşleşecek şekilde set
-                  # ediyoruz. Bu bir güvenlik açığı değil: origin kontrolü sadece "bu worker
-                  # sadece bizim sitemizden çağrılsın" kuralını uyguluyor, biz zaten kendi
-                  # deploy pipeline'ımızdan, kendi sitemiz adına çağırıyoruz.
                   wreq = urllib.request.Request(WORKER_URL, data=worker_body, method='POST',
                                                  headers={'Content-Type': 'application/json',
                                                           'Origin': 'https://umitm0d.github.io',
@@ -550,9 +437,6 @@ jobs:
                       print('Worker çağrısı hata (' + app_id + '):', e)
                       continue
                   try:
-                      # Artık sadece True değil, id'nin bildirildiği anki timestamp'i de
-                      # saklıyoruz ki bir sonraki deploy'da "aynı mod mu, yoksa güncellenmiş
-                      # (yeni timestamp'li) bir versiyon mu" ayrımını yapabilelim.
                       rtdb_put('/notifiedNewApps/' + app_id, {
                           'timestamp': app_timestamp,
                           'notifiedAt': int(time.time() * 1000)
