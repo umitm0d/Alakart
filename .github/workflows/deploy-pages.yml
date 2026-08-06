@@ -1,4 +1,4 @@
-name: deneme
+name: build-and-deploy
 
 on:
   workflow_dispatch: {}
@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
