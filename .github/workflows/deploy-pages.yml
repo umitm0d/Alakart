@@ -198,11 +198,42 @@ jobs:
           cp source/sw.js dist/sw.js
           echo "✅ manifest.json ve sw.js (source/sw.js'den) dist/ içine kopyalandı"
 
+      # ---- YENİ: APK'ları VirusTotal ile otomatik tara (dist'e kopyalamadan ÖNCE) ----
+      # SORUN: vt-scan-apks.js daha önce bu pipeline'ın HİÇBİR yerinde çalıştırılmıyordu —
+      # yani hiçbir apk hiçbir zaman otomatik taranmıyordu. Ayrıca script kendi içinde
+      # "aynı id daha önce taranmışsa atla" mantığı kullanıyordu; bu da bir uygulamanın
+      # YENİ SÜRÜMÜ (aynı id, farklı apk) yüklendiğinde eski sonucun kopyalanıp yeni
+      # dosyanın hiç taranmadan geçmesine sebep oluyordu (script tarafında ayrıca
+      # hash+url karşılaştırmasıyla düzeltildi, bkz. vt-scan-apks.js).
+      # Bu adım her deploy'da (yeni mod eklendiğinde veya var olan bir modun
+      # url/version'ı değiştiğinde) otomatik çalışır: değişmeyen modlar hash eşleştiği
+      # için atlanır (VT kotası boşa harcanmaz), değişenler yeniden taranır.
+      # VT_SCAN_RESULTS_CACHE (isteğe bağlı, actions/cache) taramalar arası önceki
+      # sonuçları (vt-scan-results.json) taşımak için kullanılır — yoksa her build'de
+      # sıfırdan başlar ve HİÇBİR apk daha önce taranmış olsa bile atlanmaz (kota israfı).
+      - name: Önceki VT tarama sonuçlarını önbellekten geri yükle
+        uses: actions/cache@v4
+        with:
+          path: vt-scan-results.json
+          key: vt-scan-results-v1
+
+      - name: APK'ları VirusTotal ile tara (id+hash bazlı, sadece yeni/değişen dosyalar)
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        run: |
+          if [ -z "$VT_API_KEY" ]; then
+            echo "::error::VT_API_KEY secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin (virustotal.com üzerinden ücretsiz API anahtarı alınabilir)."
+            exit 1
+          fi
+          APPS_JSON_FILE=source/umitm0d.json VT_WRITE_BACK_TO=source/umitm0d.json node vt-scan-apks.js
+          echo "✅ VirusTotal taraması tamamlandı, sonuçlar source/umitm0d.json içine vtVerdict alanı olarak işlendi."
+
       # ---- Uygulama listesi JSON'unu dist'e kopyala (repo'da hiçbir yerde görünmez) ----
       # source/umitm0d.json sadece PRIVATE repoda yaşıyor, public repoya asla
       # push edilmiyor. Sadece build sırasında dist/ içine kopyalanıp Pages
       # sitesiyle birlikte yayınlanıyor — aynı origin'den servis edildiği için
-      # CORS sorunu da hiç yaşanmıyor.
+      # CORS sorunu da hiç yaşanmıyor. NOT: Bu adım artık VT taramasından SONRA
+      # çalışıyor ki dist'e kopyalanan dosyada güncel vtVerdict alanları da olsun.
       - name: Uygulama listesi JSON'unu dist'e kopyala
         run: |
           if [ ! -f "source/umitm0d.json" ]; then
@@ -210,7 +241,7 @@ jobs:
             exit 1
           fi
           cp source/umitm0d.json dist/umitm0d.json
-          echo "✅ source/umitm0d.json dist/ içine kopyalandı"
+          echo "✅ source/umitm0d.json (vtVerdict dahil) dist/ içine kopyalandı"
 
       # ---- version.json üret ----
       # Sayfa içi checkForAppUpdate() bu dosyayı cache: 'no-store' ile
