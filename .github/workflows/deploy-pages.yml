@@ -219,10 +219,17 @@ jobs:
 
       - name: APK'ları VirusTotal ile tara (id+hash bazlı, sadece yeni/değişen dosyalar)
         env:
+          # YEDEK ANAHTAR DESTEĞİ: VT_API_KEY secret'ına birden fazla anahtar,
+          # virgülle ayrılmış olarak girilebilir, ör: "anahtar1,anahtar2,anahtar3".
+          # İlk anahtar kota/rate-limit hatası (429) verirse script otomatik olarak
+          # sıradaki anahtara geçer; TÜM anahtarlar tükenirse build hataya düşmez,
+          # taranamayan modlar bir sonraki build'de (kota yenilendiğinde) otomatik
+          # yeniden denenir. Tek anahtar kullanmak istiyorsan hiçbir şey değişmez,
+          # sadece virgül koymadan tek anahtarı gir.
           VT_API_KEY: ${{ secrets.VT_API_KEY }}
         run: |
           if [ -z "$VT_API_KEY" ]; then
-            echo "::error::VT_API_KEY secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin (virustotal.com üzerinden ücretsiz API anahtarı alınabilir)."
+            echo "::error::VT_API_KEY secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin (virustotal.com üzerinden ücretsiz API anahtarı alınabilir). Birden fazla (yedek) anahtar eklemek için değerleri virgülle ayırarak girin: anahtar1,anahtar2"
             exit 1
           fi
           APPS_JSON_FILE=source/umitm0d.json VT_WRITE_BACK_TO=source/umitm0d.json node vt-scan-apks.js
