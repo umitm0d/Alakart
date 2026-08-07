@@ -208,9 +208,19 @@ jobs:
       # Bu adım her deploy'da (yeni mod eklendiğinde veya var olan bir modun
       # url/version'ı değiştiğinde) otomatik çalışır: değişmeyen modlar hash eşleştiği
       # için atlanır (VT kotası boşa harcanmaz), değişenler yeniden taranır.
-      # VT_SCAN_RESULTS_CACHE (isteğe bağlı, actions/cache) taramalar arası önceki
-      # sonuçları (vt-scan-results.json) taşımak için kullanılır — yoksa her build'de
-      # sıfırdan başlar ve HİÇBİR apk daha önce taranmış olsa bile atlanmaz (kota israfı).
+      #
+      # ÖNEMLİ DÜZELTME: Umitm0dstore.html içinde ZATEN HAZIR bekleyen bir mekanizma
+      # var (fetchAndMergeVtResults) — sayfa, VT sonuçlarını umitm0d.json'un İÇİNDEN
+      # değil, ayrı bir dosyadan (raw.githubusercontent.com/umitm0d/Alakart/refs/heads/
+      # main/vt-scan-results.json) çekip her app'e app.vt olarak işliyor ve kartlarda
+      # "Riskli/Şüpheli/Temiz" rozetini SADECE bu app.vt alanına bakarak gösteriyor.
+      # Önceki sürümde bu adım sonucu umitm0d.json İÇİNE "vtVerdict" adıyla gömüyordu —
+      # hem yanlış alan adı (kod app.vt bekliyor, vtVerdict'i hiç okumuyor) hem de
+      # yanlış dosya (kod ayrı bir dosyadan okuyor) olduğu için HİÇBİR rozet
+      # görünmüyordu. Artık script'in ürettiği vt-scan-results.json dosyası,
+      # kodun beklediği TAM olarak o adrese (public Alakart reposunun main dalının
+      # KÖKÜNE) otomatik push ediliyor — umitm0d.json'a hiçbir şey yazılmıyor,
+      # olduğu gibi bırakılıyor.
       - name: Önceki VT tarama sonuçlarını önbellekten geri yükle
         uses: actions/cache@v4
         with:
@@ -232,15 +242,49 @@ jobs:
             echo "::error::VT_API_KEY secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin (virustotal.com üzerinden ücretsiz API anahtarı alınabilir). Birden fazla (yedek) anahtar eklemek için değerleri virgülle ayırarak girin: anahtar1,anahtar2"
             exit 1
           fi
-          APPS_JSON_FILE=source/umitm0d.json VT_WRITE_BACK_TO=source/umitm0d.json node vt-scan-apks.js
-          echo "✅ VirusTotal taraması tamamlandı, sonuçlar source/umitm0d.json içine vtVerdict alanı olarak işlendi."
+          APPS_JSON_FILE=source/umitm0d.json node vt-scan-apks.js
+          echo "✅ VirusTotal taraması tamamlandı, sonuçlar vt-scan-results.json içine yazıldı."
+
+      # ---- YENİ: vt-scan-results.json dosyasını public (Alakart) reposunun köküne push et ----
+      # Umitm0dstore.html sayfası bu dosyayı TAM OLARAK bu adresten (public repo, main
+      # dalı, kök dizin) çekiyor: raw.githubusercontent.com/umitm0d/Alakart/refs/heads/
+      # main/vt-scan-results.json — bu adım olmadan dosya hiçbir yere ulaşmıyordu ve
+      # rozetler hiç görünmüyordu. actions/checkout burada AYRI bir dizine (alakart-public/)
+      # açılıyor çünkü ana checkout adımı zaten private (Alakart-source) reposunu
+      # çalışma dizinine çekmiş durumda — ikisini karıştırmamak için.
+      # NOT: DISPATCH_TOKEN'ın (main.yml'deki deploy tetikleme için zaten var olan token)
+      # Alakart reposu üzerinde "Contents: Read and write" iznine de sahip olması gerekir
+      # (sadece "Actions: Read and write" yeterli değildir) — aksi halde push adımı
+      # "403"/"denied" hatasıyla başarısız olur (job'u bloklamaz, sadece uyarı basar).
+      - name: vt-scan-results.json'u public repoya (Alakart, main) push et
+        run: |
+          if [ ! -f "vt-scan-results.json" ]; then
+            echo "::warning::vt-scan-results.json bulunamadı (VT taraması hiç çalışmamış olabilir), push atlandı."
+            exit 0
+          fi
+          git clone --depth 1 https://x-access-token:${{ secrets.DISPATCH_TOKEN }}@github.com/umitm0d/Alakart.git alakart-public || {
+            echo "::warning::Public repo klonlanamadı (DISPATCH_TOKEN izinlerini kontrol edin), push atlandı.";
+            exit 0;
+          }
+          cp vt-scan-results.json alakart-public/vt-scan-results.json
+          cd alakart-public
+          git config user.name "umitm0d-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet -- vt-scan-results.json; then
+            echo "ℹ️ vt-scan-results.json değişmemiş, push atlandı."
+          else
+            git add vt-scan-results.json
+            git commit -m "VT tarama sonuçlarını güncelle (otomatik)"
+            git push origin HEAD:main || echo "::warning::vt-scan-results.json push edilemedi (DISPATCH_TOKEN izinlerini kontrol edin)."
+            echo "✅ vt-scan-results.json public repoya push edildi."
+          fi
 
       # ---- Uygulama listesi JSON'unu dist'e kopyala (repo'da hiçbir yerde görünmez) ----
       # source/umitm0d.json sadece PRIVATE repoda yaşıyor, public repoya asla
       # push edilmiyor. Sadece build sırasında dist/ içine kopyalanıp Pages
       # sitesiyle birlikte yayınlanıyor — aynı origin'den servis edildiği için
-      # CORS sorunu da hiç yaşanmıyor. NOT: Bu adım artık VT taramasından SONRA
-      # çalışıyor ki dist'e kopyalanan dosyada güncel vtVerdict alanları da olsun.
+      # CORS sorunu da hiç yaşanmıyor. VT sonuçları bu dosyanın İÇİNE değil,
+      # ayrı bir dosyaya (vt-scan-results.json, public repoya push edilir) yazılıyor.
       - name: Uygulama listesi JSON'unu dist'e kopyala
         run: |
           if [ ! -f "source/umitm0d.json" ]; then
