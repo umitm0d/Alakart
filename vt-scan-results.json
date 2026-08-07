@@ -1,7 +1,16 @@
 {
   "1": {
-    "error": "VT yükleme başarısız: 413",
-    "scanDate": "2026-08-01T08:18:29.444Z"
+    "malicious": 1,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 46,
+    "total": 47,
+    "scanDate": "2026-08-07T21:39:18.025Z",
+    "permalink": "https://www.virustotal.com/gui/file/08a9fd02b3b10195d4c2f88a0695625cb5ab59fd4882f070ed53cacb13f9bf7d",
+    "hash": "08a9fd02b3b10195d4c2f88a0695625cb5ab59fd4882f070ed53cacb13f9bf7d",
+    "appUrl": "https://mth.tc/Mackolik",
+    "appVersion": "3.5.7",
+    "verdict": "malicious"
   },
   "2": {
     "malicious": 1,
@@ -11,6 +20,9 @@
     "total": 65,
     "scanDate": "2026-07-15T00:46:11.000Z",
     "permalink": "https://www.virustotal.com/gui/file/4411ffa45e26336b92ce50893c51eb991ab418a3724c2e5edb788adfe5208f38",
+    "hash": "4411ffa45e26336b92ce50893c51eb991ab418a3724c2e5edb788adfe5208f38",
+    "appUrl": "https://mth.tc/GpikumitM0d",
+    "appVersion": "2.2.3",
     "verdict": "malicious"
   },
   "3": {
@@ -21,6 +33,9 @@
     "total": 67,
     "scanDate": "2026-02-13T02:59:35.000Z",
     "permalink": "https://www.virustotal.com/gui/file/8cee15ec9ab4980336bba7f6142f5c1a70df02b9567a0aab997bd71a827bd826",
+    "hash": "8cee15ec9ab4980336bba7f6142f5c1a70df02b9567a0aab997bd71a827bd826",
+    "appUrl": "https://mth.tc/Tombiktv",
+    "appVersion": "2.0.4",
     "verdict": "malicious"
   },
   "4": {
@@ -31,11 +46,23 @@
     "total": 65,
     "scanDate": "2026-08-01T08:10:05.000Z",
     "permalink": "https://www.virustotal.com/gui/file/bb92767cc415250073f45fe416169e843094e6b6756406cca1e4a892993cc8ef",
+    "hash": "bb92767cc415250073f45fe416169e843094e6b6756406cca1e4a892993cc8ef",
+    "appUrl": "https://mth.tc/Golgetv",
+    "appVersion": "2.2.8",
     "verdict": "malicious"
   },
   "5": {
-    "error": "VT yükleme başarısız: 413",
-    "scanDate": "2026-08-01T08:19:41.850Z"
+    "malicious": 5,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 60,
+    "total": 65,
+    "scanDate": "2026-08-07T21:44:23.945Z",
+    "permalink": "https://www.virustotal.com/gui/file/fcd3c965108731d2f384ccbd90e07b460bfefe69a5cc4f04e52e5fa072b43c14",
+    "hash": "fcd3c965108731d2f384ccbd90e07b460bfefe69a5cc4f04e52e5fa072b43c14",
+    "appUrl": "https://mth.tc/Golgebox1",
+    "appVersion": "2.2.8",
+    "verdict": "malicious"
   },
   "6": {
     "malicious": 0,
@@ -45,6 +72,9 @@
     "total": 65,
     "scanDate": "2026-01-22T16:36:19.000Z",
     "permalink": "https://www.virustotal.com/gui/file/27ae67fd2e21d12ae91aa35c37e61c7c00ffdbe56dfa825d8fd298b283846403",
+    "hash": "27ae67fd2e21d12ae91aa35c37e61c7c00ffdbe56dfa825d8fd298b283846403",
+    "appUrl": "https://mth.tc/Browsehere",
+    "appVersion": "8.06.25",
     "verdict": "clean"
   },
   "7": {
@@ -55,6 +85,9 @@
     "total": 66,
     "scanDate": "2026-02-07T23:26:42.000Z",
     "permalink": "https://www.virustotal.com/gui/file/be4da79b942c1969a40898f31d94c4a71fc39f6cd9be8e4721a9ac1193b6bbef",
+    "hash": "be4da79b942c1969a40898f31d94c4a71fc39f6cd9be8e4721a9ac1193b6bbef",
+    "appUrl": "https://mth.tc/Inattv",
+    "appVersion": "15.2.1",
     "verdict": "malicious"
   },
   "8": {
@@ -65,6 +98,9 @@
     "total": 67,
     "scanDate": "2026-08-01T08:12:55.000Z",
     "permalink": "https://www.virustotal.com/gui/file/37aacbed7f8253af0029e4aea4a98f6265776d864b56535ae72168c43e814e3c",
+    "hash": "37aacbed7f8253af0029e4aea4a98f6265776d864b56535ae72168c43e814e3c",
+    "appUrl": "https://mth.tc/Umitm0dvpn",
+    "appVersion": "1.2.1",
     "verdict": "malicious"
   },
   "9": {
@@ -75,6 +111,9 @@
     "total": 65,
     "scanDate": "2026-06-04T23:04:23.000Z",
     "permalink": "https://www.virustotal.com/gui/file/66f285a19fb1088a2abdbdfc173e1f9e853b3a8058a7fb252a1c99f2c2880411",
+    "hash": "66f285a19fb1088a2abdbdfc173e1f9e853b3a8058a7fb252a1c99f2c2880411",
+    "appUrl": "https://mth.tc/Recbox",
+    "appVersion": "19.2.0",
     "verdict": "clean"
   },
   "10": {
@@ -85,6 +124,9 @@
     "total": 64,
     "scanDate": "2026-02-11T20:59:25.000Z",
     "permalink": "https://www.virustotal.com/gui/file/be7218e3d62c5159c429e4f8c076197cacd796b467fc0ac63f9891a4db99d5d1",
+    "hash": "be7218e3d62c5159c429e4f8c076197cacd796b467fc0ac63f9891a4db99d5d1",
+    "appUrl": "https://mth.tc/Rectvtelefon",
+    "appVersion": "19.4",
     "verdict": "malicious"
   },
   "11": {
@@ -95,6 +137,9 @@
     "total": 67,
     "scanDate": "2026-08-01T08:15:25.000Z",
     "permalink": "https://www.virustotal.com/gui/file/5c47008787a3029dd965ad987cd72ada2a24f1cc8f966b815177181fd558ccc2",
+    "hash": "5c47008787a3029dd965ad987cd72ada2a24f1cc8f966b815177181fd558ccc2",
+    "appUrl": "https://mth.tc/Sendfilestv",
+    "appVersion": "1.4.22",
     "verdict": "malicious"
   },
   "12": {
@@ -105,16 +150,35 @@
     "total": 68,
     "scanDate": "2025-04-05T10:27:37.000Z",
     "permalink": "https://www.virustotal.com/gui/file/d89213b40d51b238fdda25f5e3d949e22dda5ef3befb4fbb3151a31851999769",
+    "hash": "d89213b40d51b238fdda25f5e3d949e22dda5ef3befb4fbb3151a31851999769",
+    "appUrl": "https://mth.tc/EasyTools",
+    "appVersion": "1.18",
     "verdict": "clean"
   },
   "13": {
     "malicious": 2,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 54,
-    "total": 56,
-    "scanDate": "2026-05-19T01:34:11.000Z",
+    "undetected": 59,
+    "total": 61,
+    "scanDate": "2026-08-04T15:28:47.000Z",
     "permalink": "https://www.virustotal.com/gui/file/887ba85475add98592649e570ce8efb055440ddc4b99d1f64aed569dbe14fca4",
+    "hash": "887ba85475add98592649e570ce8efb055440ddc4b99d1f64aed569dbe14fca4",
+    "appUrl": "https://mth.tc/TelegramGold",
+    "appVersion": "",
     "verdict": "malicious"
+  },
+  "14": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 64,
+    "total": 64,
+    "scanDate": "2026-08-07T21:49:11.363Z",
+    "permalink": "https://www.virustotal.com/gui/file/979461bfd3eb5720c389a86d9da30cee1105e92ec06dd6c0efc1f27e3600dfc7",
+    "hash": "979461bfd3eb5720c389a86d9da30cee1105e92ec06dd6c0efc1f27e3600dfc7",
+    "appUrl": "https://files.catbox.moe/wynqpu.apk?download=1",
+    "appVersion": "1.1",
+    "verdict": "clean"
   }
 }
