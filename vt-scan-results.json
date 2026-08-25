@@ -193,5 +193,57 @@
     "appUrl": "https://files.catbox.moe/wwuceb.apk?download=1",
     "appVersion": "4.8.0",
     "verdict": "clean"
+  },
+  "16": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 67,
+    "total": 67,
+    "scanDate": "2026-08-25T05:23:31.125Z",
+    "permalink": "https://www.virustotal.com/gui/file/7e55a43f3aebd89a9d404fd1869033584717dd7c406c74dd773b61919515af9e",
+    "hash": "7e55a43f3aebd89a9d404fd1869033584717dd7c406c74dd773b61919515af9e",
+    "appUrl": "https://files.catbox.moe/rneru7.apk?download=1",
+    "appVersion": "1.9.0.5",
+    "verdict": "clean"
+  },
+  "17": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 64,
+    "total": 64,
+    "scanDate": "2026-08-25T05:25:44.121Z",
+    "permalink": "https://www.virustotal.com/gui/file/44c8d5e68045baf29752e1d9f1b0b559c0e8f61aecc1be470850cf5f8e34f342",
+    "hash": "44c8d5e68045baf29752e1d9f1b0b559c0e8f61aecc1be470850cf5f8e34f342",
+    "appUrl": "https://files.catbox.moe/lq3dw1.apk?download=1",
+    "appVersion": "1.9.9.31-g",
+    "verdict": "clean"
+  },
+  "18": {
+    "malicious": 1,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 65,
+    "total": 66,
+    "scanDate": "2026-08-23T17:26:00.000Z",
+    "permalink": "https://www.virustotal.com/gui/file/db5878ee87ea1144dc0948252326cc75901a89c25766efce9e7ff6615a9e4bd7",
+    "hash": "db5878ee87ea1144dc0948252326cc75901a89c25766efce9e7ff6615a9e4bd7",
+    "appUrl": "https://files.catbox.moe/j5m2hz.apk?download=1",
+    "appVersion": "1.0.6",
+    "verdict": "malicious"
+  },
+  "19": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 67,
+    "total": 67,
+    "scanDate": "2026-08-23T08:29:25.000Z",
+    "permalink": "https://www.virustotal.com/gui/file/cca37642d68b77e0b20954e4a24d0b4d74c00a850b2fa382ed0f4fcf0422cd5e",
+    "hash": "cca37642d68b77e0b20954e4a24d0b4d74c00a850b2fa382ed0f4fcf0422cd5e",
+    "appUrl": "https://files.catbox.moe/oe68cu.apk?download=1",
+    "appVersion": "0.4.10",
+    "verdict": "clean"
   }
 }
