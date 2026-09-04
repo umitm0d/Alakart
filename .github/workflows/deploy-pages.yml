@@ -67,22 +67,8 @@ jobs:
       #   cd (bu reponun kökü) && npm install
       # çalıştırıp oluşan package-lock.json dosyasını commit'leyin. Ondan
       # sonraki her build bu adımı kullanabilir.
-      #
-      # [perf-fix 2] Cache isabet etmesine rağmen (bkz. "Node.js kur" logundaki
-      # "Cache hit for: node-cache-...") npm ci hâlâ 7 dakika sürdü — bu normal
-      # değil, cache: 'npm' sadece npm'in TARBALL indirme cache'ini (~/.npm)
-      # saklıyor, ama npm ci varsayılan olarak HER paket için ayrıca registry'ye
-      # bir "audit" isteği (güvenlik taraması) ve "fund" bilgisi sorguluyor —
-      # bu ekstra ağ round-trip'leri cache'den bağımsız çalışıyor ve GitHub
-      # Actions runner'ından npm registry'ye giden bağlantı yavaşsa/kısıtlıysa
-      # asıl zamanı bunlar yiyor olabilir. --no-audit --no-fund bu ekstra
-      # istekleri tamamen kapatır. --prefer-offline npm'e önce yerel cache'e
-      # bakmasını, sadece cache'te olmayanlar için ağa gitmesini söyler —
-      # cache zaten isabet ettiği için bu adımın çoğunu ağsız hallettirebilir.
-      # Bu üçü de kurulan paketleri/sürümleri DEĞİŞTİRMEZ, sadece gereksiz
-      # ekstra istekleri keser.
       - name: Bağımlılıkları yükle
-        run: npm ci --no-audit --no-fund --prefer-offline --loglevel verbose
+        run: npm ci
 
       # ---- Teaser video linkini KAYNAK dosyaya (source/), OBFUSCATE'DEN ÖNCE enjekte et ----
       - name: Teaser video linkini kaynağa enjekte et (build öncesi)
@@ -256,11 +242,26 @@ jobs:
       # kodun beklediği TAM olarak o adrese (public Alakart reposunun main dalının
       # KÖKÜNE) otomatik push ediliyor — umitm0d.json'a hiçbir şey yazılmıyor,
       # olduğu gibi bırakılıyor.
+      #
+      # GÜVENLİK DÜZELTMESİ: vt-scan-results.json artık appUrl/appVersion
+      # İÇERMİYOR (bkz. vt-scan-apks.js — writeOutputs). Önceden bu dosya
+      # olduğu gibi push edildiğinde her modun gerçek APK indirme linki
+      # (mth.tc/..., catbox.moe/..., hatta private GitHub release adresleri)
+      # public repoda, raw.githubusercontent.com üzerinden HERKESE açık
+      # şekilde görünüyordu. Şimdi sadece rozet göstermek için gereken alanlar
+      # (verdict/malicious/suspicious/harmless/undetected/total/scanDate/
+      # permalink/hash) push ediliyor.
+      # GÜVENLİK DÜZELTMESİ (bkz. vt-scan-apks.js): karşılaştırma/cache kaynağı
+      # artık vt-scan-internal-cache.json — appUrl/appVersion içeren TAM
+      # kayıtlar (gerçek APK indirme linkleri dahil) sadece bu dosyada tutulur
+      # ve hiçbir zaman push edilmez. vt-scan-results.json (public'e push
+      # edilen dosya) artık appUrl/appVersion İÇERMEZ, bu yüzden onu cache'lemeye
+      # gerek yok — karşılaştırma için gereken bilgi zaten internal cache'te.
       - name: Önceki VT tarama sonuçlarını önbellekten geri yükle
         uses: actions/cache@v4
         with:
-          path: vt-scan-results.json
-          key: vt-scan-results-v1
+          path: vt-scan-internal-cache.json
+          key: vt-scan-internal-cache-v1
 
       - name: APK'ları VirusTotal ile tara (id+hash bazlı, sadece yeni/değişen dosyalar)
         env:
@@ -277,8 +278,8 @@ jobs:
             echo "::error::VT_API_KEY secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin (virustotal.com üzerinden ücretsiz API anahtarı alınabilir). Birden fazla (yedek) anahtar eklemek için değerleri virgülle ayırarak girin: anahtar1,anahtar2"
             exit 1
           fi
-          APPS_JSON_FILE=source/umitm0d.json node vt-scan-apks.js
-          echo "✅ VirusTotal taraması tamamlandı, sonuçlar vt-scan-results.json içine yazıldı."
+          APPS_JSON_FILE=source/umitm0d.json VT_INTERNAL_CACHE_FILE=vt-scan-internal-cache.json node vt-scan-apks.js
+          echo "✅ VirusTotal taraması tamamlandı, sonuçlar vt-scan-results.json içine yazıldı (appUrl/appVersion hariç, sadece internal cache'te)."
 
       # ---- YENİ: vt-scan-results.json dosyasını public (Alakart) reposunun köküne push et ----
       # Umitm0dstore.html sayfası bu dosyayı TAM OLARAK bu adresten (public repo, main
