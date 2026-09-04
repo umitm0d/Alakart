@@ -45,9 +45,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          # [perf-fix] cache:'npm' + package-lock.json ikilisi olmadan bu satır
+          # etkisiz kalıyordu (cache key genelde lockfile hash'ine bağlanır).
+          # Artık repoda bir package-lock.json OLMASI ŞART (bkz. aşağıdaki not).
+          cache: 'npm'
 
+      # [perf-fix] ÖNEMLİ: Bu adım "npm install" yerine artık "npm ci" kullanıyor.
+      # Eskiden repoda package-lock.json YOKTU — bu yüzden her build'de npm,
+      # package.json'daki "^" (caret) aralıklarını (ör. "^4.1.1") registry'den
+      # SIFIRDAN yeniden çözümlüyordu: hem cache işe yaramıyordu (cache key
+      # lockfile hash'ine bağlanır) hem de bazen gerçekten yeni bir
+      # minor/patch sürüm registry'de çıktığında npm onu çekiyordu — "bazen
+      # defalarca yenilik güncellemesi yapıyor" şikayetinin sebebi buydu.
+      # "npm ci" tam tersine lockfile'daki sürümleri BİREBİR kurar, hiçbir
+      # sürüm çözümlemesi yapmaz, üstteki cache ile birlikte çok daha hızlıdır
+      # ve deterministiktir (her build'de aynı sürümler).
+      #
+      # GEREKLİ TEK SEFERLİK ADIM: Bu repo'da henüz package-lock.json yok.
+      # "npm ci" lockfile olmadan ÇALIŞMAZ (hata verip durur). Bu yüzden
+      # lokalde bir kere:
+      #   cd (bu reponun kökü) && npm install
+      # çalıştırıp oluşan package-lock.json dosyasını commit'leyin. Ondan
+      # sonraki her build bu adımı kullanabilir.
       - name: Bağımlılıkları yükle
-        run: npm install
+        run: npm ci
 
       # ---- Teaser video linkini KAYNAK dosyaya (source/), OBFUSCATE'DEN ÖNCE enjekte et ----
       - name: Teaser video linkini kaynağa enjekte et (build öncesi)
