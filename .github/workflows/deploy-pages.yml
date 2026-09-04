@@ -67,8 +67,30 @@ jobs:
       #   cd (bu reponun kökü) && npm install
       # çalıştırıp oluşan package-lock.json dosyasını commit'leyin. Ondan
       # sonraki her build bu adımı kullanabilir.
+      # [fix: "bağımlılık yükleme bazen kaçırıyor"] "npm ci", setup-node'un
+      # 'cache: npm' restore adımıyla art arda/hızlı tetiklenen build'lerde
+      # (bkz. yukarıdaki concurrency: cancel-in-progress) bazen ~/.npm cache'ini
+      # eksik/kısmi geri yükleyebiliyor; bu durumda npm bir alt-paketi (genelde
+      # javascript-obfuscator'ın kendi transitive bağımlılıklarından biri)
+      # sessizce atlayıp exit 0 ile bitebiliyor — sonraki adım (build) o paket
+      # gerçekten kullanılana kadar hata vermediği için sorun çok sonra, hatalı
+      # obfuscate/minify çıktısı olarak ortaya çıkıyordu. Artık npm ci'den hemen
+      # sonra node_modules'ün gerçekten TAM kurulu olduğunu doğruluyoruz
+      # (npm ls --production=false, sadece üst düzey bağımlılıkları kontrol
+      # eder, hızlıdır); eksik/bozuk çıkarsa cache'i bozan kalıntıyı temizleyip
+      # AĞDAN (npm cache'i bypass ederek) bir kez daha deniyoruz. İkinci deneme
+      # de başarısız olursa build zaten (doğru şekilde) hataya düşer.
       - name: Bağımlılıkları yükle
-        run: npm ci
+        run: |
+          npm ci
+          if ! npm ls --production=false --depth=0 > /tmp/npm-ls-output.txt 2>&1; then
+            echo "::warning::npm ci sonrası node_modules eksik/tutarsız görünüyor, cache bypass edilip temiz kurulum deneniyor..."
+            cat /tmp/npm-ls-output.txt
+            rm -rf node_modules
+            npm ci --prefer-offline=false --no-cache
+            npm ls --production=false --depth=0
+          fi
+          echo "✅ Bağımlılıklar doğrulandı."
 
       # ---- Teaser video linkini KAYNAK dosyaya (source/), OBFUSCATE'DEN ÖNCE enjekte et ----
       - name: Teaser video linkini kaynağa enjekte et (build öncesi)
