@@ -237,18 +237,26 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 67,
-    "total": 67,
-    "scanDate": "2026-08-23T08:29:25.000Z",
-    "permalink": "https://www.virustotal.com/gui/file/cca37642d68b77e0b20954e4a24d0b4d74c00a850b2fa382ed0f4fcf0422cd5e",
-    "hash": "cca37642d68b77e0b20954e4a24d0b4d74c00a850b2fa382ed0f4fcf0422cd5e",
-    "appUrl": "https://files.catbox.moe/oe68cu.apk?download=1",
-    "appVersion": "0.4.10",
+    "undetected": 62,
+    "total": 62,
+    "scanDate": "2026-09-04T03:52:03.615Z",
+    "permalink": "https://www.virustotal.com/gui/file/62f82302a488679839b2906bfcbc608ea5cb6ebdd2f52a2d5002864c37308af2",
+    "hash": "62f82302a488679839b2906bfcbc608ea5cb6ebdd2f52a2d5002864c37308af2",
+    "appUrl": "https://github.com/umitm0d/apk-deposu-20260904/releases/download/v20260904_060202/nuvioarm64v8.apk",
+    "appVersion": "0.8.12",
     "verdict": "clean"
   },
   "20": {
-    "error": "İndirme başarısız (404): https://github.com/umitm0d/apk-deposu-20260904/releases/download/v20260904_042211/nuviotvbox.apk",
-    "scanDate": "2026-09-04T03:10:24.565Z",
-    "appUrl": "https://github.com/umitm0d/apk-deposu-20260904/releases/download/v20260904_042211/nuviotvbox.apk"
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 61,
+    "total": 61,
+    "scanDate": "2026-09-04T03:55:11.954Z",
+    "permalink": "https://www.virustotal.com/gui/file/75868015a2099e0c00d1438772c74d435948a1d4a3016b106530a7ed7e05d9d2",
+    "hash": "75868015a2099e0c00d1438772c74d435948a1d4a3016b106530a7ed7e05d9d2",
+    "appUrl": "https://github.com/umitm0d/apk-deposu-20260904/releases/download/v20260904_060114/nuviotvbox.apk",
+    "appVersion": "0.8.12",
+    "verdict": "clean"
   }
 }
