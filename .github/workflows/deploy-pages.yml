@@ -67,8 +67,22 @@ jobs:
       #   cd (bu reponun kökü) && npm install
       # çalıştırıp oluşan package-lock.json dosyasını commit'leyin. Ondan
       # sonraki her build bu adımı kullanabilir.
+      #
+      # [perf-fix 2] Cache isabet etmesine rağmen (bkz. "Node.js kur" logundaki
+      # "Cache hit for: node-cache-...") npm ci hâlâ 7 dakika sürdü — bu normal
+      # değil, cache: 'npm' sadece npm'in TARBALL indirme cache'ini (~/.npm)
+      # saklıyor, ama npm ci varsayılan olarak HER paket için ayrıca registry'ye
+      # bir "audit" isteği (güvenlik taraması) ve "fund" bilgisi sorguluyor —
+      # bu ekstra ağ round-trip'leri cache'den bağımsız çalışıyor ve GitHub
+      # Actions runner'ından npm registry'ye giden bağlantı yavaşsa/kısıtlıysa
+      # asıl zamanı bunlar yiyor olabilir. --no-audit --no-fund bu ekstra
+      # istekleri tamamen kapatır. --prefer-offline npm'e önce yerel cache'e
+      # bakmasını, sadece cache'te olmayanlar için ağa gitmesini söyler —
+      # cache zaten isabet ettiği için bu adımın çoğunu ağsız hallettirebilir.
+      # Bu üçü de kurulan paketleri/sürümleri DEĞİŞTİRMEZ, sadece gereksiz
+      # ekstra istekleri keser.
       - name: Bağımlılıkları yükle
-        run: npm ci
+        run: npm ci --no-audit --no-fund --prefer-offline --loglevel verbose
 
       # ---- Teaser video linkini KAYNAK dosyaya (source/), OBFUSCATE'DEN ÖNCE enjekte et ----
       - name: Teaser video linkini kaynağa enjekte et (build öncesi)
