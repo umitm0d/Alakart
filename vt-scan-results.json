@@ -208,9 +208,17 @@
     "verdict": "clean"
   },
   "17": {
-    "error": "request to https://www.virustotal.com/api/v3/files/44c8d5e68045baf29752e1d9f1b0b559c0e8f61aecc1be470850cf5f8e34f342 failed, reason: read ECONNRESET",
-    "scanDate": "2026-09-04T01:33:07.826Z",
-    "appUrl": "https://files.catbox.moe/lq3dw1.apk?download=1"
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 65,
+    "total": 65,
+    "scanDate": "2026-08-25T05:23:54.000Z",
+    "permalink": "https://www.virustotal.com/gui/file/44c8d5e68045baf29752e1d9f1b0b559c0e8f61aecc1be470850cf5f8e34f342",
+    "hash": "44c8d5e68045baf29752e1d9f1b0b559c0e8f61aecc1be470850cf5f8e34f342",
+    "appUrl": "https://files.catbox.moe/lq3dw1.apk?download=1",
+    "appVersion": "1.9.9.31-g",
+    "verdict": "clean"
   },
   "18": {
     "malicious": 1,
@@ -239,8 +247,16 @@
     "verdict": "clean"
   },
   "20": {
-    "error": "request to https://www.virustotal.com/api/v3/analyses/NTRlNDIwNTcxZjAyYWUwODkyYWExOTVhZTU3OGNiZTE6MTc4ODQ4NTY1MA== failed, reason: read ECONNRESET",
-    "scanDate": "2026-09-04T01:35:58.087Z",
-    "appUrl": "https://github.com/umitm0d/apk-deposu-20260904/releases/download/v20260904_042211/nuviotvbox.apk"
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 61,
+    "total": 61,
+    "scanDate": "2026-09-04T01:34:10.000Z",
+    "permalink": "https://www.virustotal.com/gui/file/f65aed3ec943b1bbfe2734dd39ce2c7619c350170d9bce11ce21a04e7666d6c9",
+    "hash": "f65aed3ec943b1bbfe2734dd39ce2c7619c350170d9bce11ce21a04e7666d6c9",
+    "appUrl": "https://github.com/umitm0d/apk-deposu-20260904/releases/download/v20260904_042211/nuviotvbox.apk",
+    "appVersion": "0.8.12",
+    "verdict": "clean"
   }
 }
