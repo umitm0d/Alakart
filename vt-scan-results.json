@@ -958,13 +958,13 @@
     "verdict": "malicious"
   },
   "5": {
-    "malicious": 1,
+    "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 65,
-    "total": 66,
-    "scanDate": "2026-08-20T07:12:46.000Z",
-    "permalink": "https://www.virustotal.com/gui/file/5e92118c88a19812f1ea367ac65161cf9c0a34ef96fc06f77f9d5fc96c9d0a66",
+    "undetected": 67,
+    "total": 67,
+    "scanDate": "2026-09-01T15:06:57.000Z",
+    "permalink": "https://www.virustotal.com/gui/file/5c7a5b7e2ba5ce207c09dc7c6605c256eaf5b4955e02c488ee5afebc05feb32a",
     "engines": {
       "Bkav": {
         "category": "undetected"
@@ -987,6 +987,9 @@
       "Skyhigh": {
         "category": "undetected"
       },
+      "ALYac": {
+        "category": "undetected"
+      },
       "Malwarebytes": {
         "category": "undetected"
       },
@@ -1005,10 +1008,13 @@
       "K7GW": {
         "category": "undetected"
       },
-      "Trustlook": {
+      "CrowdStrike": {
         "category": "undetected"
       },
       "Arcabit": {
+        "category": "undetected"
+      },
+      "huorong": {
         "category": "undetected"
       },
       "VirIT": {
@@ -1044,13 +1050,13 @@
       "ViRobot": {
         "category": "undetected"
       },
-      "Rising": {
+      "Tencent": {
         "category": "undetected"
       },
-      "Sophos": {
+      "Trustlook": {
         "category": "undetected"
       },
-      "Google": {
+      "Emsisoft": {
         "category": "undetected"
       },
       "F-Secure": {
@@ -1071,10 +1077,10 @@
       "CMC": {
         "category": "undetected"
       },
-      "Emsisoft": {
+      "Sophos": {
         "category": "undetected"
       },
-      "huorong": {
+      "Ikarus": {
         "category": "undetected"
       },
       "GData": {
@@ -1116,12 +1122,11 @@
       "Avast-Mobile": {
         "category": "undetected"
       },
-      "Cynet": {
+      "Google": {
         "category": "undetected"
       },
       "BitDefenderFalx": {
-        "category": "malicious",
-        "result": "Android.Riskware.TestKey.rA"
+        "category": "undetected"
       },
       "AhnLab-V3": {
         "category": "undetected"
@@ -1138,7 +1143,7 @@
       "Zoner": {
         "category": "undetected"
       },
-      "Tencent": {
+      "Rising": {
         "category": "undetected"
       },
       "Yandex": {
@@ -1162,15 +1167,6 @@
       "Panda": {
         "category": "undetected"
       },
-      "CrowdStrike": {
-        "category": "undetected"
-      },
-      "ALYac": {
-        "category": "failure"
-      },
-      "Ikarus": {
-        "category": "failure"
-      },
       "tehtris": {
         "category": "type-unsupported"
       },
@@ -1183,6 +1179,9 @@
       "Paloalto": {
         "category": "type-unsupported"
       },
+      "Cynet": {
+        "category": "type-unsupported"
+      },
       "Trapmine": {
         "category": "type-unsupported"
       },
@@ -1193,8 +1192,8 @@
         "category": "type-unsupported"
       }
     },
-    "hash": "5e92118c88a19812f1ea367ac65161cf9c0a34ef96fc06f77f9d5fc96c9d0a66",
-    "verdict": "malicious"
+    "hash": "5c7a5b7e2ba5ce207c09dc7c6605c256eaf5b4955e02c488ee5afebc05feb32a",
+    "verdict": "clean"
   },
   "6": {
     "malicious": 0,
