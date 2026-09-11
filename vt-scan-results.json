@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 66,
-    "total": 66,
-    "scanDate": "2026-09-11T18:06:21.000Z",
+    "undetected": 67,
+    "total": 67,
+    "scanDate": "2026-09-11T19:54:14.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4944,6 +4944,9 @@
       "TACHYON": {
         "category": "undetected"
       },
+      "Ikarus": {
+        "category": "undetected"
+      },
       "Zoner": {
         "category": "undetected"
       },
@@ -4974,16 +4977,13 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "Ikarus": {
-        "category": "failure"
-      },
       "DeepInstinct": {
         "category": "type-unsupported"
       },
       "tehtris": {
         "category": "type-unsupported"
       },
-      "APEX": {
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Paloalto": {
@@ -4992,7 +4992,7 @@
       "Cynet": {
         "category": "type-unsupported"
       },
-      "Trapmine": {
+      "APEX": {
         "category": "type-unsupported"
       },
       "Cylance": {
@@ -5249,7 +5249,8 @@
     "harmless": 0,
     "undetected": 64,
     "total": 67,
-    "scanDate": "2026-09-11T19:18:22.419Z",
+    "scanDate": "2026-09-11T19:17:06.000Z",
+    "permalink": "https://www.virustotal.com/gui/file/8d198d6027f3fca39900468e1a641e838ce5483aee27462984b0528726a9de38",
     "engines": {
       "Bkav": {
         "category": "undetected"
@@ -5480,7 +5481,6 @@
         "category": "type-unsupported"
       }
     },
-    "permalink": "https://www.virustotal.com/gui/file/8d198d6027f3fca39900468e1a641e838ce5483aee27462984b0528726a9de38",
     "hash": "8d198d6027f3fca39900468e1a641e838ce5483aee27462984b0528726a9de38",
     "verdict": "malicious"
   },
@@ -5959,6 +5959,244 @@
       }
     },
     "hash": "92dbaa2928d97d9334b2ca781ad4dbeb99ccf179a1c0a9a678763d82b0e620f6",
+    "verdict": "clean"
+  },
+  "26": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 0,
+    "undetected": 66,
+    "total": 66,
+    "scanDate": "2026-09-05T10:25:29.000Z",
+    "permalink": "https://www.virustotal.com/gui/file/e686921a0b7c7f321ed6cb7bffe9eb33788873e10d0e2703bc675e19eb11f652",
+    "engines": {
+      "Bkav": {
+        "category": "undetected"
+      },
+      "Lionic": {
+        "category": "undetected"
+      },
+      "Elastic": {
+        "category": "undetected"
+      },
+      "MicroWorld-eScan": {
+        "category": "undetected"
+      },
+      "CTX": {
+        "category": "undetected"
+      },
+      "CAT-QuickHeal": {
+        "category": "undetected"
+      },
+      "Skyhigh": {
+        "category": "undetected"
+      },
+      "ALYac": {
+        "category": "undetected"
+      },
+      "Malwarebytes": {
+        "category": "undetected"
+      },
+      "Zillya": {
+        "category": "undetected"
+      },
+      "Sangfor": {
+        "category": "undetected"
+      },
+      "Trustlook": {
+        "category": "undetected"
+      },
+      "BitDefender": {
+        "category": "undetected"
+      },
+      "K7GW": {
+        "category": "undetected"
+      },
+      "K7AntiVirus": {
+        "category": "undetected"
+      },
+      "VirIT": {
+        "category": "undetected"
+      },
+      "SymantecMobileInsight": {
+        "category": "undetected"
+      },
+      "Symantec": {
+        "category": "undetected"
+      },
+      "ESET-NOD32": {
+        "category": "undetected"
+      },
+      "TrendMicro-HouseCall": {
+        "category": "undetected"
+      },
+      "Avast": {
+        "category": "undetected"
+      },
+      "ClamAV": {
+        "category": "undetected"
+      },
+      "Kaspersky": {
+        "category": "undetected"
+      },
+      "Alibaba": {
+        "category": "undetected"
+      },
+      "NANO-Antivirus": {
+        "category": "undetected"
+      },
+      "ViRobot": {
+        "category": "undetected"
+      },
+      "Tencent": {
+        "category": "undetected"
+      },
+      "Sophos": {
+        "category": "undetected"
+      },
+      "F-Secure": {
+        "category": "undetected"
+      },
+      "DrWeb": {
+        "category": "undetected"
+      },
+      "VIPRE": {
+        "category": "undetected"
+      },
+      "TrendMicro": {
+        "category": "undetected"
+      },
+      "McAfeeD": {
+        "category": "undetected"
+      },
+      "CMC": {
+        "category": "undetected"
+      },
+      "Emsisoft": {
+        "category": "undetected"
+      },
+      "huorong": {
+        "category": "undetected"
+      },
+      "GData": {
+        "category": "undetected"
+      },
+      "Jiangmin": {
+        "category": "undetected"
+      },
+      "Webroot": {
+        "category": "undetected"
+      },
+      "Google": {
+        "category": "undetected"
+      },
+      "Avira": {
+        "category": "undetected"
+      },
+      "Antiy-AVL": {
+        "category": "undetected"
+      },
+      "Kingsoft": {
+        "category": "undetected"
+      },
+      "Microsoft": {
+        "category": "undetected"
+      },
+      "Gridinsoft": {
+        "category": "undetected"
+      },
+      "Xcitium": {
+        "category": "undetected"
+      },
+      "Arcabit": {
+        "category": "undetected"
+      },
+      "SUPERAntiSpyware": {
+        "category": "undetected"
+      },
+      "ZoneAlarm": {
+        "category": "undetected"
+      },
+      "Avast-Mobile": {
+        "category": "undetected"
+      },
+      "Varist": {
+        "category": "undetected"
+      },
+      "BitDefenderFalx": {
+        "category": "undetected"
+      },
+      "AhnLab-V3": {
+        "category": "undetected"
+      },
+      "Acronis": {
+        "category": "undetected"
+      },
+      "VBA32": {
+        "category": "undetected"
+      },
+      "TACHYON": {
+        "category": "undetected"
+      },
+      "Zoner": {
+        "category": "undetected"
+      },
+      "Rising": {
+        "category": "undetected"
+      },
+      "Yandex": {
+        "category": "undetected"
+      },
+      "TrellixENS": {
+        "category": "undetected"
+      },
+      "SentinelOne": {
+        "category": "undetected"
+      },
+      "MaxSecure": {
+        "category": "undetected"
+      },
+      "Fortinet": {
+        "category": "undetected"
+      },
+      "AVG": {
+        "category": "undetected"
+      },
+      "Panda": {
+        "category": "undetected"
+      },
+      "CrowdStrike": {
+        "category": "undetected"
+      },
+      "Ikarus": {
+        "category": "failure"
+      },
+      "DeepInstinct": {
+        "category": "type-unsupported"
+      },
+      "tehtris": {
+        "category": "type-unsupported"
+      },
+      "APEX": {
+        "category": "type-unsupported"
+      },
+      "Paloalto": {
+        "category": "type-unsupported"
+      },
+      "Cynet": {
+        "category": "type-unsupported"
+      },
+      "Trapmine": {
+        "category": "type-unsupported"
+      },
+      "Cylance": {
+        "category": "type-unsupported"
+      },
+      "alibabacloud": {
+        "category": "type-unsupported"
+      }
+    },
+    "hash": "e686921a0b7c7f321ed6cb7bffe9eb33788873e10d0e2703bc675e19eb11f652",
     "verdict": "clean"
   }
 }
