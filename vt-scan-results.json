@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 67,
-    "total": 67,
-    "scanDate": "2026-09-12T09:02:14.000Z",
+    "undetected": 66,
+    "total": 66,
+    "scanDate": "2026-09-12T12:56:58.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4812,7 +4812,7 @@
       "K7AntiVirus": {
         "category": "undetected"
       },
-      "Alibaba": {
+      "BitDefender": {
         "category": "undetected"
       },
       "K7GW": {
@@ -4821,7 +4821,7 @@
       "Trustlook": {
         "category": "undetected"
       },
-      "huorong": {
+      "Arcabit": {
         "category": "undetected"
       },
       "VirIT": {
@@ -4848,7 +4848,7 @@
       "Kaspersky": {
         "category": "undetected"
       },
-      "BitDefender": {
+      "Alibaba": {
         "category": "undetected"
       },
       "NANO-Antivirus": {
@@ -4878,6 +4878,9 @@
       "McAfeeD": {
         "category": "undetected"
       },
+      "SentinelOne": {
+        "category": "undetected"
+      },
       "CTX": {
         "category": "undetected"
       },
@@ -4887,16 +4890,13 @@
       "Ikarus": {
         "category": "undetected"
       },
-      "Avast-Mobile": {
+      "GData": {
         "category": "undetected"
       },
       "Jiangmin": {
         "category": "undetected"
       },
       "Webroot": {
-        "category": "undetected"
-      },
-      "Varist": {
         "category": "undetected"
       },
       "Avira": {
@@ -4908,16 +4908,13 @@
       "Kingsoft": {
         "category": "undetected"
       },
-      "Microsoft": {
-        "category": "undetected"
-      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Arcabit": {
+      "Microsoft": {
         "category": "undetected"
       },
       "SUPERAntiSpyware": {
@@ -4926,10 +4923,10 @@
       "ZoneAlarm": {
         "category": "undetected"
       },
-      "GData": {
+      "Avast-Mobile": {
         "category": "undetected"
       },
-      "Google": {
+      "Varist": {
         "category": "undetected"
       },
       "BitDefenderFalx": {
@@ -4959,7 +4956,7 @@
       "TrellixENS": {
         "category": "undetected"
       },
-      "SentinelOne": {
+      "huorong": {
         "category": "undetected"
       },
       "MaxSecure": {
@@ -4977,13 +4974,16 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "DeepInstinct": {
-        "category": "type-unsupported"
+      "Google": {
+        "category": "failure"
       },
       "tehtris": {
         "category": "type-unsupported"
       },
-      "APEX": {
+      "DeepInstinct": {
+        "category": "type-unsupported"
+      },
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Paloalto": {
@@ -4992,7 +4992,7 @@
       "Cynet": {
         "category": "type-unsupported"
       },
-      "Trapmine": {
+      "APEX": {
         "category": "type-unsupported"
       },
       "Cylance": {
