@@ -4773,7 +4773,7 @@
     "harmless": 0,
     "undetected": 66,
     "total": 66,
-    "scanDate": "2026-09-12T17:27:11.000Z",
+    "scanDate": "2026-09-12T18:52:32.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4812,19 +4812,13 @@
       "K7AntiVirus": {
         "category": "undetected"
       },
-      "BitDefender": {
+      "Alibaba": {
         "category": "undetected"
       },
       "K7GW": {
         "category": "undetected"
       },
       "Trustlook": {
-        "category": "undetected"
-      },
-      "Arcabit": {
-        "category": "undetected"
-      },
-      "VirIT": {
         "category": "undetected"
       },
       "SymantecMobileInsight": {
@@ -4848,19 +4842,19 @@
       "Kaspersky": {
         "category": "undetected"
       },
-      "Alibaba": {
+      "BitDefender": {
         "category": "undetected"
       },
       "NANO-Antivirus": {
         "category": "undetected"
       },
-      "ViRobot": {
+      "SUPERAntiSpyware": {
         "category": "undetected"
       },
       "Tencent": {
         "category": "undetected"
       },
-      "Emsisoft": {
+      "Sophos": {
         "category": "undetected"
       },
       "F-Secure": {
@@ -4881,10 +4875,10 @@
       "CTX": {
         "category": "undetected"
       },
-      "Sophos": {
+      "Emsisoft": {
         "category": "undetected"
       },
-      "huorong": {
+      "SentinelOne": {
         "category": "undetected"
       },
       "GData": {
@@ -4908,16 +4902,19 @@
       "Kingsoft": {
         "category": "undetected"
       },
+      "Microsoft": {
+        "category": "undetected"
+      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Microsoft": {
+      "Arcabit": {
         "category": "undetected"
       },
-      "SUPERAntiSpyware": {
+      "ViRobot": {
         "category": "undetected"
       },
       "ZoneAlarm": {
@@ -4944,6 +4941,9 @@
       "TACHYON": {
         "category": "undetected"
       },
+      "Ikarus": {
+        "category": "undetected"
+      },
       "Zoner": {
         "category": "undetected"
       },
@@ -4956,7 +4956,7 @@
       "TrellixENS": {
         "category": "undetected"
       },
-      "SentinelOne": {
+      "huorong": {
         "category": "undetected"
       },
       "MaxSecure": {
@@ -4974,16 +4974,16 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "Ikarus": {
-        "category": "failure"
-      },
-      "DeepInstinct": {
-        "category": "type-unsupported"
+      "VirIT": {
+        "category": "timeout"
       },
       "tehtris": {
         "category": "type-unsupported"
       },
-      "APEX": {
+      "DeepInstinct": {
+        "category": "type-unsupported"
+      },
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Paloalto": {
@@ -4992,7 +4992,7 @@
       "Cynet": {
         "category": "type-unsupported"
       },
-      "Trapmine": {
+      "APEX": {
         "category": "type-unsupported"
       },
       "Cylance": {
