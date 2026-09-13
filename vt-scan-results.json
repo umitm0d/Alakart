@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 66,
-    "total": 66,
-    "scanDate": "2026-09-13T13:46:55.000Z",
+    "undetected": 67,
+    "total": 67,
+    "scanDate": "2026-09-13T16:31:36.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4884,7 +4884,7 @@
       "Sophos": {
         "category": "undetected"
       },
-      "SentinelOne": {
+      "huorong": {
         "category": "undetected"
       },
       "GData": {
@@ -4944,6 +4944,9 @@
       "TACHYON": {
         "category": "undetected"
       },
+      "Ikarus": {
+        "category": "undetected"
+      },
       "Zoner": {
         "category": "undetected"
       },
@@ -4956,7 +4959,7 @@
       "TrellixENS": {
         "category": "undetected"
       },
-      "huorong": {
+      "SentinelOne": {
         "category": "undetected"
       },
       "MaxSecure": {
@@ -4974,16 +4977,13 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "Ikarus": {
-        "category": "failure"
-      },
       "tehtris": {
         "category": "type-unsupported"
       },
       "DeepInstinct": {
         "category": "type-unsupported"
       },
-      "APEX": {
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Paloalto": {
@@ -4992,7 +4992,7 @@
       "Cynet": {
         "category": "type-unsupported"
       },
-      "Trapmine": {
+      "APEX": {
         "category": "type-unsupported"
       },
       "Cylance": {
