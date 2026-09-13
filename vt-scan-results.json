@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 67,
-    "total": 67,
-    "scanDate": "2026-09-13T11:13:00.000Z",
+    "undetected": 66,
+    "total": 66,
+    "scanDate": "2026-09-13T13:46:55.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4809,22 +4809,19 @@
       "Sangfor": {
         "category": "undetected"
       },
-      "K7AntiVirus": {
+      "Trustlook": {
         "category": "undetected"
       },
-      "Alibaba": {
+      "BitDefender": {
         "category": "undetected"
       },
       "K7GW": {
         "category": "undetected"
       },
-      "Trustlook": {
+      "K7AntiVirus": {
         "category": "undetected"
       },
       "Arcabit": {
-        "category": "undetected"
-      },
-      "huorong": {
         "category": "undetected"
       },
       "VirIT": {
@@ -4851,7 +4848,7 @@
       "Kaspersky": {
         "category": "undetected"
       },
-      "BitDefender": {
+      "Alibaba": {
         "category": "undetected"
       },
       "NANO-Antivirus": {
@@ -4863,7 +4860,7 @@
       "Tencent": {
         "category": "undetected"
       },
-      "Sophos": {
+      "Emsisoft": {
         "category": "undetected"
       },
       "F-Secure": {
@@ -4884,10 +4881,10 @@
       "CTX": {
         "category": "undetected"
       },
-      "Emsisoft": {
+      "Sophos": {
         "category": "undetected"
       },
-      "Ikarus": {
+      "SentinelOne": {
         "category": "undetected"
       },
       "GData": {
@@ -4959,7 +4956,7 @@
       "TrellixENS": {
         "category": "undetected"
       },
-      "SentinelOne": {
+      "huorong": {
         "category": "undetected"
       },
       "MaxSecure": {
@@ -4977,13 +4974,16 @@
       "CrowdStrike": {
         "category": "undetected"
       },
+      "Ikarus": {
+        "category": "failure"
+      },
       "tehtris": {
         "category": "type-unsupported"
       },
       "DeepInstinct": {
         "category": "type-unsupported"
       },
-      "Trapmine": {
+      "APEX": {
         "category": "type-unsupported"
       },
       "Paloalto": {
@@ -4992,7 +4992,7 @@
       "Cynet": {
         "category": "type-unsupported"
       },
-      "APEX": {
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Cylance": {
