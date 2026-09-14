@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 67,
-    "total": 67,
-    "scanDate": "2026-09-13T16:31:36.000Z",
+    "undetected": 65,
+    "total": 65,
+    "scanDate": "2026-09-14T07:18:22.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4812,7 +4812,7 @@
       "Trustlook": {
         "category": "undetected"
       },
-      "BitDefender": {
+      "Alibaba": {
         "category": "undetected"
       },
       "K7GW": {
@@ -4848,7 +4848,7 @@
       "Kaspersky": {
         "category": "undetected"
       },
-      "Alibaba": {
+      "BitDefender": {
         "category": "undetected"
       },
       "NANO-Antivirus": {
@@ -4896,9 +4896,6 @@
       "Webroot": {
         "category": "undetected"
       },
-      "Varist": {
-        "category": "undetected"
-      },
       "Avira": {
         "category": "undetected"
       },
@@ -4926,7 +4923,7 @@
       "Avast-Mobile": {
         "category": "undetected"
       },
-      "Google": {
+      "Varist": {
         "category": "undetected"
       },
       "BitDefenderFalx": {
@@ -4942,9 +4939,6 @@
         "category": "undetected"
       },
       "TACHYON": {
-        "category": "undetected"
-      },
-      "Ikarus": {
         "category": "undetected"
       },
       "Zoner": {
@@ -4977,13 +4971,19 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "tehtris": {
-        "category": "type-unsupported"
+      "Google": {
+        "category": "failure"
+      },
+      "Ikarus": {
+        "category": "failure"
       },
       "DeepInstinct": {
         "category": "type-unsupported"
       },
-      "Trapmine": {
+      "tehtris": {
+        "category": "type-unsupported"
+      },
+      "APEX": {
         "category": "type-unsupported"
       },
       "Paloalto": {
@@ -4992,7 +4992,7 @@
       "Cynet": {
         "category": "type-unsupported"
       },
-      "APEX": {
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Cylance": {
