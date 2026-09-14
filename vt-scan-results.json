@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 65,
-    "total": 65,
-    "scanDate": "2026-09-14T07:18:22.000Z",
+    "undetected": 64,
+    "total": 64,
+    "scanDate": "2026-09-14T14:27:02.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4788,13 +4788,10 @@
       "MicroWorld-eScan": {
         "category": "undetected"
       },
-      "CMC": {
+      "CTX": {
         "category": "undetected"
       },
       "CAT-QuickHeal": {
-        "category": "undetected"
-      },
-      "Skyhigh": {
         "category": "undetected"
       },
       "ALYac": {
@@ -4809,7 +4806,7 @@
       "Sangfor": {
         "category": "undetected"
       },
-      "Trustlook": {
+      "K7AntiVirus": {
         "category": "undetected"
       },
       "Alibaba": {
@@ -4818,7 +4815,7 @@
       "K7GW": {
         "category": "undetected"
       },
-      "K7AntiVirus": {
+      "Trustlook": {
         "category": "undetected"
       },
       "Arcabit": {
@@ -4860,7 +4857,7 @@
       "Tencent": {
         "category": "undetected"
       },
-      "Emsisoft": {
+      "Sophos": {
         "category": "undetected"
       },
       "F-Secure": {
@@ -4878,10 +4875,10 @@
       "McAfeeD": {
         "category": "undetected"
       },
-      "CTX": {
+      "CMC": {
         "category": "undetected"
       },
-      "Sophos": {
+      "Emsisoft": {
         "category": "undetected"
       },
       "huorong": {
@@ -4941,6 +4938,9 @@
       "TACHYON": {
         "category": "undetected"
       },
+      "Ikarus": {
+        "category": "undetected"
+      },
       "Zoner": {
         "category": "undetected"
       },
@@ -4948,9 +4948,6 @@
         "category": "undetected"
       },
       "Yandex": {
-        "category": "undetected"
-      },
-      "TrellixENS": {
         "category": "undetected"
       },
       "SentinelOne": {
@@ -4971,16 +4968,19 @@
       "CrowdStrike": {
         "category": "undetected"
       },
+      "TrellixENS": {
+        "category": "timeout"
+      },
+      "Skyhigh": {
+        "category": "failure"
+      },
       "Google": {
         "category": "failure"
       },
-      "Ikarus": {
-        "category": "failure"
-      },
-      "DeepInstinct": {
+      "tehtris": {
         "category": "type-unsupported"
       },
-      "tehtris": {
+      "DeepInstinct": {
         "category": "type-unsupported"
       },
       "APEX": {
@@ -4990,9 +4990,6 @@
         "category": "type-unsupported"
       },
       "Cynet": {
-        "category": "type-unsupported"
-      },
-      "Trapmine": {
         "category": "type-unsupported"
       },
       "Cylance": {
