@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 65,
-    "total": 65,
-    "scanDate": "2026-09-15T07:03:57.000Z",
+    "undetected": 66,
+    "total": 66,
+    "scanDate": "2026-09-15T11:30:19.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4809,22 +4809,22 @@
       "Sangfor": {
         "category": "undetected"
       },
-      "Trustlook": {
+      "K7AntiVirus": {
         "category": "undetected"
       },
-      "BitDefender": {
+      "Alibaba": {
         "category": "undetected"
       },
       "K7GW": {
         "category": "undetected"
       },
-      "K7AntiVirus": {
-        "category": "undetected"
-      },
-      "Arcabit": {
+      "Trustlook": {
         "category": "undetected"
       },
       "huorong": {
+        "category": "undetected"
+      },
+      "VirIT": {
         "category": "undetected"
       },
       "SymantecMobileInsight": {
@@ -4848,7 +4848,7 @@
       "Kaspersky": {
         "category": "undetected"
       },
-      "Alibaba": {
+      "BitDefender": {
         "category": "undetected"
       },
       "NANO-Antivirus": {
@@ -4857,10 +4857,10 @@
       "ViRobot": {
         "category": "undetected"
       },
-      "Rising": {
+      "Tencent": {
         "category": "undetected"
       },
-      "Sophos": {
+      "Emsisoft": {
         "category": "undetected"
       },
       "F-Secure": {
@@ -4881,7 +4881,7 @@
       "CTX": {
         "category": "undetected"
       },
-      "Emsisoft": {
+      "Sophos": {
         "category": "undetected"
       },
       "Ikarus": {
@@ -4905,13 +4905,16 @@
       "Kingsoft": {
         "category": "undetected"
       },
+      "Microsoft": {
+        "category": "undetected"
+      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Microsoft": {
+      "Arcabit": {
         "category": "undetected"
       },
       "SUPERAntiSpyware": {
@@ -4944,7 +4947,7 @@
       "Zoner": {
         "category": "undetected"
       },
-      "Tencent": {
+      "Rising": {
         "category": "undetected"
       },
       "Yandex": {
@@ -4971,16 +4974,13 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "VirIT": {
-        "category": "timeout"
-      },
       "Google": {
-        "category": "timeout"
-      },
-      "tehtris": {
-        "category": "type-unsupported"
+        "category": "failure"
       },
       "DeepInstinct": {
+        "category": "type-unsupported"
+      },
+      "tehtris": {
         "category": "type-unsupported"
       },
       "APEX": {
