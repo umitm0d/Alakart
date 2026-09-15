@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 67,
-    "total": 67,
-    "scanDate": "2026-09-14T17:32:58.000Z",
+    "undetected": 65,
+    "total": 65,
+    "scanDate": "2026-09-15T07:03:57.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4812,7 +4812,7 @@
       "Trustlook": {
         "category": "undetected"
       },
-      "Alibaba": {
+      "BitDefender": {
         "category": "undetected"
       },
       "K7GW": {
@@ -4821,10 +4821,10 @@
       "K7AntiVirus": {
         "category": "undetected"
       },
-      "huorong": {
+      "Arcabit": {
         "category": "undetected"
       },
-      "VirIT": {
+      "huorong": {
         "category": "undetected"
       },
       "SymantecMobileInsight": {
@@ -4848,7 +4848,7 @@
       "Kaspersky": {
         "category": "undetected"
       },
-      "BitDefender": {
+      "Alibaba": {
         "category": "undetected"
       },
       "NANO-Antivirus": {
@@ -4857,10 +4857,10 @@
       "ViRobot": {
         "category": "undetected"
       },
-      "Tencent": {
+      "Rising": {
         "category": "undetected"
       },
-      "Emsisoft": {
+      "Sophos": {
         "category": "undetected"
       },
       "F-Secure": {
@@ -4881,22 +4881,19 @@
       "CTX": {
         "category": "undetected"
       },
-      "Sophos": {
+      "Emsisoft": {
         "category": "undetected"
       },
       "Ikarus": {
         "category": "undetected"
       },
-      "Avast-Mobile": {
+      "GData": {
         "category": "undetected"
       },
       "Jiangmin": {
         "category": "undetected"
       },
       "Webroot": {
-        "category": "undetected"
-      },
-      "Varist": {
         "category": "undetected"
       },
       "Avira": {
@@ -4908,16 +4905,13 @@
       "Kingsoft": {
         "category": "undetected"
       },
-      "Microsoft": {
-        "category": "undetected"
-      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Arcabit": {
+      "Microsoft": {
         "category": "undetected"
       },
       "SUPERAntiSpyware": {
@@ -4926,10 +4920,10 @@
       "ZoneAlarm": {
         "category": "undetected"
       },
-      "GData": {
+      "Avast-Mobile": {
         "category": "undetected"
       },
-      "Google": {
+      "Varist": {
         "category": "undetected"
       },
       "BitDefenderFalx": {
@@ -4950,7 +4944,7 @@
       "Zoner": {
         "category": "undetected"
       },
-      "Rising": {
+      "Tencent": {
         "category": "undetected"
       },
       "Yandex": {
@@ -4977,10 +4971,16 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "DeepInstinct": {
-        "category": "type-unsupported"
+      "VirIT": {
+        "category": "timeout"
+      },
+      "Google": {
+        "category": "timeout"
       },
       "tehtris": {
+        "category": "type-unsupported"
+      },
+      "DeepInstinct": {
         "category": "type-unsupported"
       },
       "APEX": {
