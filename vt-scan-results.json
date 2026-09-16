@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 51,
-    "total": 51,
-    "scanDate": "2026-09-16T07:28:55.000Z",
+    "undetected": 33,
+    "total": 33,
+    "scanDate": "2026-09-16T14:41:11.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4788,15 +4788,6 @@
       "MicroWorld-eScan": {
         "category": "undetected"
       },
-      "CTX": {
-        "category": "undetected"
-      },
-      "CAT-QuickHeal": {
-        "category": "undetected"
-      },
-      "ALYac": {
-        "category": "undetected"
-      },
       "Malwarebytes": {
         "category": "undetected"
       },
@@ -4806,13 +4797,7 @@
       "Trustlook": {
         "category": "undetected"
       },
-      "K7GW": {
-        "category": "undetected"
-      },
       "K7AntiVirus": {
-        "category": "undetected"
-      },
-      "Arcabit": {
         "category": "undetected"
       },
       "SymantecMobileInsight": {
@@ -4821,49 +4806,25 @@
       "Symantec": {
         "category": "undetected"
       },
-      "ESET-NOD32": {
-        "category": "undetected"
-      },
       "Alibaba": {
         "category": "undetected"
       },
-      "NANO-Antivirus": {
-        "category": "undetected"
-      },
-      "ViRobot": {
-        "category": "undetected"
-      },
-      "Emsisoft": {
-        "category": "undetected"
-      },
-      "F-Secure": {
-        "category": "undetected"
-      },
-      "DrWeb": {
+      "SUPERAntiSpyware": {
         "category": "undetected"
       },
       "VIPRE": {
         "category": "undetected"
       },
-      "TrendMicro": {
-        "category": "undetected"
-      },
       "McAfeeD": {
-        "category": "undetected"
-      },
-      "CMC": {
         "category": "undetected"
       },
       "Sophos": {
         "category": "undetected"
       },
-      "Ikarus": {
+      "huorong": {
         "category": "undetected"
       },
-      "GData": {
-        "category": "undetected"
-      },
-      "Jiangmin": {
+      "Avast-Mobile": {
         "category": "undetected"
       },
       "Webroot": {
@@ -4881,31 +4842,22 @@
       "Gridinsoft": {
         "category": "undetected"
       },
-      "Xcitium": {
-        "category": "undetected"
-      },
       "Microsoft": {
         "category": "undetected"
       },
-      "SUPERAntiSpyware": {
+      "ViRobot": {
         "category": "undetected"
       },
       "ZoneAlarm": {
         "category": "undetected"
       },
-      "Avast-Mobile": {
-        "category": "undetected"
-      },
-      "SentinelOne": {
+      "GData": {
         "category": "undetected"
       },
       "BitDefenderFalx": {
         "category": "undetected"
       },
       "AhnLab-V3": {
-        "category": "undetected"
-      },
-      "VBA32": {
         "category": "undetected"
       },
       "TACHYON": {
@@ -4917,19 +4869,76 @@
       "Tencent": {
         "category": "undetected"
       },
-      "Yandex": {
-        "category": "undetected"
-      },
-      "huorong": {
-        "category": "undetected"
-      },
-      "MaxSecure": {
+      "SentinelOne": {
         "category": "undetected"
       },
       "CrowdStrike": {
         "category": "undetected"
       },
+      "CTX": {
+        "category": "timeout"
+      },
+      "CAT-QuickHeal": {
+        "category": "timeout"
+      },
+      "Skyhigh": {
+        "category": "timeout"
+      },
+      "ALYac": {
+        "category": "timeout"
+      },
+      "K7GW": {
+        "category": "timeout"
+      },
       "VirIT": {
+        "category": "confirmed-timeout"
+      },
+      "ESET-NOD32": {
+        "category": "timeout"
+      },
+      "TrendMicro-HouseCall": {
+        "category": "timeout"
+      },
+      "Avast": {
+        "category": "timeout"
+      },
+      "ClamAV": {
+        "category": "timeout"
+      },
+      "Kaspersky": {
+        "category": "timeout"
+      },
+      "BitDefender": {
+        "category": "timeout"
+      },
+      "NANO-Antivirus": {
+        "category": "timeout"
+      },
+      "DrWeb": {
+        "category": "timeout"
+      },
+      "Zillya": {
+        "category": "timeout"
+      },
+      "TrendMicro": {
+        "category": "timeout"
+      },
+      "CMC": {
+        "category": "timeout"
+      },
+      "Emsisoft": {
+        "category": "timeout"
+      },
+      "Jiangmin": {
+        "category": "timeout"
+      },
+      "Google": {
+        "category": "timeout"
+      },
+      "Xcitium": {
+        "category": "timeout"
+      },
+      "Arcabit": {
         "category": "timeout"
       },
       "Varist": {
@@ -4938,49 +4947,40 @@
       "Acronis": {
         "category": "timeout"
       },
-      "TrendMicro-HouseCall": {
-        "category": "timeout"
-      },
-      "Google": {
+      "VBA32": {
         "category": "timeout"
       },
       "Rising": {
         "category": "timeout"
       },
+      "Yandex": {
+        "category": "timeout"
+      },
+      "TrellixENS": {
+        "category": "timeout"
+      },
+      "MaxSecure": {
+        "category": "timeout"
+      },
       "Fortinet": {
         "category": "timeout"
       },
-      "Zillya": {
+      "AVG": {
         "category": "timeout"
       },
-      "Avast": {
-        "category": "failure"
-      },
-      "ClamAV": {
-        "category": "failure"
-      },
-      "Kaspersky": {
-        "category": "failure"
-      },
-      "BitDefender": {
-        "category": "failure"
-      },
-      "Skyhigh": {
-        "category": "failure"
-      },
-      "TrellixENS": {
-        "category": "failure"
-      },
-      "AVG": {
-        "category": "failure"
-      },
       "Panda": {
+        "category": "timeout"
+      },
+      "F-Secure": {
+        "category": "failure"
+      },
+      "DeepInstinct": {
+        "category": "failure"
+      },
+      "Ikarus": {
         "category": "failure"
       },
       "tehtris": {
-        "category": "type-unsupported"
-      },
-      "DeepInstinct": {
         "category": "type-unsupported"
       },
       "APEX": {
