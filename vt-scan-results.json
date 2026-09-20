@@ -6199,7 +6199,8 @@
     "harmless": 0,
     "undetected": 66,
     "total": 67,
-    "scanDate": "2026-09-20T09:08:46.893Z",
+    "scanDate": "2026-09-20T09:07:28.000Z",
+    "permalink": "https://www.virustotal.com/gui/file/5de75900f4fe7b19f1f78c5f1c44ca94cf7d064ce0bfa782e1acf627b3a7ac8c",
     "engines": {
       "Bkav": {
         "category": "undetected"
@@ -6425,7 +6426,6 @@
         "category": "type-unsupported"
       }
     },
-    "permalink": "https://www.virustotal.com/gui/file/5de75900f4fe7b19f1f78c5f1c44ca94cf7d064ce0bfa782e1acf627b3a7ac8c",
     "hash": "5de75900f4fe7b19f1f78c5f1c44ca94cf7d064ce0bfa782e1acf627b3a7ac8c",
     "verdict": "malicious"
   }
