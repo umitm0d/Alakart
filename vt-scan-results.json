@@ -4771,9 +4771,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 62,
-    "total": 62,
-    "scanDate": "2026-09-21T09:35:32.000Z",
+    "undetected": 66,
+    "total": 66,
+    "scanDate": "2026-09-22T09:33:43.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4809,7 +4809,7 @@
       "Sangfor": {
         "category": "undetected"
       },
-      "Trustlook": {
+      "K7AntiVirus": {
         "category": "undetected"
       },
       "BitDefender": {
@@ -4818,10 +4818,13 @@
       "K7GW": {
         "category": "undetected"
       },
-      "K7AntiVirus": {
+      "Trustlook": {
         "category": "undetected"
       },
-      "Arcabit": {
+      "huorong": {
+        "category": "undetected"
+      },
+      "VirIT": {
         "category": "undetected"
       },
       "SymantecMobileInsight": {
@@ -4837,6 +4840,9 @@
         "category": "undetected"
       },
       "Avast": {
+        "category": "undetected"
+      },
+      "ClamAV": {
         "category": "undetected"
       },
       "Kaspersky": {
@@ -4878,10 +4884,10 @@
       "Sophos": {
         "category": "undetected"
       },
-      "huorong": {
+      "Ikarus": {
         "category": "undetected"
       },
-      "GData": {
+      "Avast-Mobile": {
         "category": "undetected"
       },
       "Jiangmin": {
@@ -4899,13 +4905,16 @@
       "Kingsoft": {
         "category": "undetected"
       },
+      "Microsoft": {
+        "category": "undetected"
+      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Microsoft": {
+      "Arcabit": {
         "category": "undetected"
       },
       "SUPERAntiSpyware": {
@@ -4914,7 +4923,7 @@
       "ZoneAlarm": {
         "category": "undetected"
       },
-      "Avast-Mobile": {
+      "GData": {
         "category": "undetected"
       },
       "Varist": {
@@ -4935,9 +4944,6 @@
       "TACHYON": {
         "category": "undetected"
       },
-      "Ikarus": {
-        "category": "undetected"
-      },
       "Zoner": {
         "category": "undetected"
       },
@@ -4947,7 +4953,13 @@
       "Yandex": {
         "category": "undetected"
       },
+      "TrellixENS": {
+        "category": "undetected"
+      },
       "SentinelOne": {
+        "category": "undetected"
+      },
+      "MaxSecure": {
         "category": "undetected"
       },
       "Fortinet": {
@@ -4962,25 +4974,13 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "MaxSecure": {
-        "category": "timeout"
-      },
-      "VirIT": {
-        "category": "confirmed-timeout"
-      },
       "Google": {
-        "category": "timeout"
-      },
-      "ClamAV": {
-        "category": "timeout"
-      },
-      "TrellixENS": {
-        "category": "timeout"
-      },
-      "DeepInstinct": {
-        "category": "type-unsupported"
+        "category": "failure"
       },
       "tehtris": {
+        "category": "type-unsupported"
+      },
+      "DeepInstinct": {
         "category": "type-unsupported"
       },
       "APEX": {
@@ -4990,6 +4990,9 @@
         "category": "type-unsupported"
       },
       "Cynet": {
+        "category": "type-unsupported"
+      },
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Cylance": {
