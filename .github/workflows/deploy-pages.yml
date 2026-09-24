@@ -21,6 +21,31 @@ jobs:
 
     steps:
 
+      # ---- LOG GİZLEME: bu adım HER ŞEYDEN ÖNCE çalışır ----
+      # GitHub sadece "secret" olarak tanımlı değerleri otomatik maskeler; repo
+      # sahibi/adı, Firebase adresi gibi değerler loglarda düz görünürdü.
+      # ::add-mask:: ile bu değerler job boyunca (sonraki tüm adımların
+      # loglarında, komut metinleri dahil) *** olarak gösterilir.
+      # Bu adımın kendi script'inde HİÇBİR link/isim yazılı değil (hepsi
+      # ortam değişkenlerinden türetiliyor), o yüzden bu adımın logunda da sızmaz.
+      - name: Logları gizle (maskele)
+        env:
+          FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
+          FORUM_PUSH_WORKER_URL: ${{ secrets.FORUM_PUSH_WORKER_URL }}
+        run: |
+          mask() { [ -n "$1" ] && echo "::add-mask::$1"; return 0; }
+          NAME="${GITHUB_REPOSITORY#*/}"
+          mask "$GITHUB_REPOSITORY"
+          mask "$GITHUB_REPOSITORY_OWNER"
+          mask "$NAME"
+          mask "${NAME}-source"
+          mask "${GITHUB_REPOSITORY_OWNER}/${NAME}-source"
+          for U in "$FIREBASE_DB_URL" "$FORUM_PUSH_WORKER_URL"; do
+            U="${U%/}"
+            mask "$U"
+            mask "${U#https://}"
+          done
+
       - name: Private kaynak reposunu çek
         uses: actions/checkout@v4
         with:
@@ -241,6 +266,15 @@ jobs:
           cp source/sw.js dist/sw.js
           echo "✅ manifest.json ve sw.js (source/sw.js'den) dist/ içine kopyalandı"
 
+          # Eski adres (/Alakart/UmitStoreForum) artık uygulamayı DEĞİL, "kapandı"
+          # sayfasını gösteriyor. Uygulamanın yeni adresi: /Alakart/Umitm0dPremiumApp
+          if [ ! -f "source/kapali.html" ]; then
+            echo "::error::source/kapali.html bulunamadı (eski adreste gösterilecek kapanış sayfası)."
+            exit 1
+          fi
+          cp source/kapali.html dist/UmitStoreForum.html
+          echo "✅ Eski adres için kapanış sayfası dist/UmitStoreForum.html olarak eklendi"
+
       # ---- YENİ: APK'ları VirusTotal ile otomatik tara (dist'e kopyalamadan ÖNCE) ----
       # SORUN: vt-scan-apks.js daha önce bu pipeline'ın HİÇBİR yerinde çalıştırılmıyordu —
       # yani hiçbir apk hiçbir zaman otomatik taranmıyordu. Ayrıca script kendi içinde
@@ -315,12 +349,14 @@ jobs:
       # (sadece "Actions: Read and write" yeterli değildir) — aksi halde push adımı
       # "403"/"denied" hatasıyla başarısız olur (job'u bloklamaz, sadece uyarı basar).
       - name: vt-scan-results.json'u public repoya (Alakart, main) push et
+        env:
+          DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
         run: |
           if [ ! -f "vt-scan-results.json" ]; then
             echo "::warning::vt-scan-results.json bulunamadı (VT taraması hiç çalışmamış olabilir), push atlandı."
             exit 0
           fi
-          git clone --depth 1 https://x-access-token:${{ secrets.DISPATCH_TOKEN }}@github.com/umitm0d/Alakart.git alakart-public || {
+          git clone --depth 1 "https://x-access-token:${DISPATCH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" alakart-public >/dev/null 2>&1 || {
             echo "::warning::Public repo klonlanamadı (DISPATCH_TOKEN izinlerini kontrol edin), push atlandı.";
             exit 0;
           }
@@ -366,31 +402,31 @@ jobs:
 
       - name: Enjeksiyonun build çıktısına geçtiğini doğrula
         run: |
-          if grep -q "__TEASER_VIDEO_URL__" dist/UmitStoreForum.html; then
-            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (TEASER_VIDEO_URL)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__TEASER_VIDEO_URL__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (TEASER_VIDEO_URL)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__CLOUDINARY_CLOUD_NAME__" dist/UmitStoreForum.html; then
-            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (CLOUDINARY_CLOUD_NAME)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__CLOUDINARY_CLOUD_NAME__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (CLOUDINARY_CLOUD_NAME)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__CLOUDINARY_UPLOAD_PRESET__" dist/UmitStoreForum.html; then
-            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (CLOUDINARY_UPLOAD_PRESET)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__CLOUDINARY_UPLOAD_PRESET__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (CLOUDINARY_UPLOAD_PRESET)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__APPS_JSON_URL__" dist/UmitStoreForum.html; then
-            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (APPS_JSON_URL)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__APPS_JSON_URL__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (APPS_JSON_URL)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__APP_BUILD_VERSION__" dist/UmitStoreForum.html; then
-            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (APP_BUILD_VERSION)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__APP_BUILD_VERSION__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (APP_BUILD_VERSION)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          if grep -q "__FORUM_PUSH_WORKER_URL__" dist/UmitStoreForum.html; then
-            echo "::error::Placeholder hâlâ dist/UmitStoreForum.html içinde (FORUM_PUSH_WORKER_URL)! Enjeksiyon başarısız olmuş olabilir."
+          if grep -q "__FORUM_PUSH_WORKER_URL__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (FORUM_PUSH_WORKER_URL)! Enjeksiyon başarısız olmuş olabilir."
             exit 1
           fi
-          echo "✅ Doğrulandı: dist/UmitStoreForum.html içinde placeholder kalmamış."
+          echo "✅ Doğrulandı: dist/Umitm0dPremiumApp.html içinde placeholder kalmamış."
 
       - name: Pages artifact'ini hazırla
         uses: actions/upload-pages-artifact@v3
@@ -445,6 +481,11 @@ jobs:
           else:
               print('::warning::FIREBASE_SERVICE_ACCOUNT_JSON secret\'ı tanımlı değil.')
 
+          # Üretilen token "secret" olmadığı için loglarda (sonraki adımların env
+          # bloğunda) düz görünürdü — çıktıya yazmadan ÖNCE maskele.
+          if token:
+              print('::add-mask::' + token)
+
           gh_output = os.environ.get('GITHUB_OUTPUT')
           with open(gh_output, 'a') as f:
               f.write('access_token=' + token + '\n')
@@ -474,7 +515,13 @@ jobs:
         env:
           ACCESS_TOKEN: ${{ steps.gcp_auth.outputs.access_token }}
           SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
+          FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
         run: |
+          if [ -z "$FIREBASE_DB_URL" ]; then
+            echo "::warning::FIREBASE_DB_URL secret'ı tanımlı değil, anlık güncelleme push'u atlandı."
+            exit 0
+          fi
+          FIREBASE_DB_URL="${FIREBASE_DB_URL%/}"
           # Ekstra güvenlik payı: deploy-pages@v4 "başarılı" dese bile GitHub'ın
           # global CDN'i her uç noktaya yayılmayı birkaç saniye daha sürdürebilir.
           # Firebase bildirimini bu küçük payı bekleyerek gönderiyoruz.
@@ -485,7 +532,7 @@ jobs:
             exit 0
           fi
           HTTP_CODE=$(curl -s -o /tmp/firebase_response.json -w "%{http_code}" -X PUT \
-            "https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app/system/appVersion.json" \
+            "${FIREBASE_DB_URL}/system/appVersion.json" \
             -H "Authorization: Bearer ${ACCESS_TOKEN}" \
             -d "{\"version\":\"${SOURCE_SHA}\",\"ts\":$(date +%s)000}")
           cat /tmp/firebase_response.json
@@ -514,7 +561,12 @@ jobs:
         env:
           ACCESS_TOKEN: ${{ steps.gcp_auth.outputs.access_token }}
           FORUM_PUSH_WORKER_URL: ${{ secrets.FORUM_PUSH_WORKER_URL }}
+          FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
         run: |
+          if [ -z "$FIREBASE_DB_URL" ]; then
+            echo "::warning::FIREBASE_DB_URL tanımlı değil, yeni mod bildirimi atlandı."
+            exit 0
+          fi
           if [ -z "$ACCESS_TOKEN" ]; then
             echo "::warning::Access token yok, yeni mod bildirimi atlandı."
             exit 0
@@ -528,7 +580,8 @@ jobs:
 
           ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN', '')
           WORKER_URL = os.environ.get('FORUM_PUSH_WORKER_URL', '')
-          DB_BASE = 'https://umitstore-4ed52-default-rtdb.europe-west1.firebasedatabase.app'
+          SITE_ORIGIN = 'https://' + os.environ.get('GITHUB_REPOSITORY_OWNER', '') + '.github.io'
+          DB_BASE = os.environ.get('FIREBASE_DB_URL', '').rstrip('/')
 
           def rtdb_get(path):
               req = urllib.request.Request(DB_BASE + path + '.json',
@@ -669,10 +722,10 @@ jobs:
                   # deploy pipeline'ımızdan, kendi sitemiz adına çağırıyoruz.
                   wreq = urllib.request.Request(WORKER_URL, data=worker_body, method='POST',
                                                  headers={'Content-Type': 'application/json',
-                                                          'Origin': 'https://umitm0d.github.io',
+                                                          'Origin': SITE_ORIGIN,
                                                           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
                                                           'Accept': 'application/json',
-                                                          'Referer': 'https://umitm0d.github.io/'})
+                                                          'Referer': SITE_ORIGIN + '/'})
                   try:
                       with urllib.request.urlopen(wreq) as wr:
                           print('Worker yanıtı (' + app_id + '):', wr.status)
