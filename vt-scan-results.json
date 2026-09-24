@@ -4773,7 +4773,7 @@
     "harmless": 0,
     "undetected": 67,
     "total": 67,
-    "scanDate": "2026-09-24T01:13:53.000Z",
+    "scanDate": "2026-09-24T05:48:09.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4812,7 +4812,7 @@
       "Trustlook": {
         "category": "undetected"
       },
-      "BitDefender": {
+      "Alibaba": {
         "category": "undetected"
       },
       "K7GW": {
@@ -4821,7 +4821,7 @@
       "K7AntiVirus": {
         "category": "undetected"
       },
-      "Arcabit": {
+      "huorong": {
         "category": "undetected"
       },
       "VirIT": {
@@ -4848,7 +4848,7 @@
       "Kaspersky": {
         "category": "undetected"
       },
-      "Alibaba": {
+      "BitDefender": {
         "category": "undetected"
       },
       "NANO-Antivirus": {
@@ -4876,9 +4876,6 @@
         "category": "undetected"
       },
       "McAfeeD": {
-        "category": "undetected"
-      },
-      "SentinelOne": {
         "category": "undetected"
       },
       "CTX": {
@@ -4911,13 +4908,16 @@
       "Kingsoft": {
         "category": "undetected"
       },
+      "Microsoft": {
+        "category": "undetected"
+      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Microsoft": {
+      "Arcabit": {
         "category": "undetected"
       },
       "ViRobot": {
@@ -4959,7 +4959,7 @@
       "TrellixENS": {
         "category": "undetected"
       },
-      "huorong": {
+      "SentinelOne": {
         "category": "undetected"
       },
       "MaxSecure": {
@@ -4977,10 +4977,10 @@
       "CrowdStrike": {
         "category": "undetected"
       },
-      "DeepInstinct": {
+      "tehtris": {
         "category": "type-unsupported"
       },
-      "tehtris": {
+      "DeepInstinct": {
         "category": "type-unsupported"
       },
       "APEX": {
