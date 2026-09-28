@@ -4544,7 +4544,7 @@
     "harmless": 0,
     "undetected": 67,
     "total": 67,
-    "scanDate": "2026-09-26T23:59:34.000Z",
+    "scanDate": "2026-09-28T12:21:30.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4580,7 +4580,7 @@
       "Sangfor": {
         "category": "undetected"
       },
-      "Trustlook": {
+      "K7AntiVirus": {
         "category": "undetected"
       },
       "BitDefender": {
@@ -4589,13 +4589,7 @@
       "K7GW": {
         "category": "undetected"
       },
-      "K7AntiVirus": {
-        "category": "undetected"
-      },
-      "Arcabit": {
-        "category": "undetected"
-      },
-      "huorong": {
+      "Trustlook": {
         "category": "undetected"
       },
       "VirIT": {
@@ -4658,7 +4652,7 @@
       "Sophos": {
         "category": "undetected"
       },
-      "Ikarus": {
+      "huorong": {
         "category": "undetected"
       },
       "GData": {
@@ -4682,13 +4676,16 @@
       "Kingsoft": {
         "category": "undetected"
       },
+      "Microsoft": {
+        "category": "undetected"
+      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Microsoft": {
+      "Arcabit": {
         "category": "undetected"
       },
       "ViRobot": {
@@ -4716,6 +4713,9 @@
         "category": "undetected"
       },
       "TACHYON": {
+        "category": "undetected"
+      },
+      "Ikarus": {
         "category": "undetected"
       },
       "Zoner": {
