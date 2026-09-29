@@ -4544,7 +4544,7 @@
     "harmless": 0,
     "undetected": 67,
     "total": 67,
-    "scanDate": "2026-09-28T12:21:30.000Z",
+    "scanDate": "2026-09-29T16:02:10.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4559,7 +4559,7 @@
       "MicroWorld-eScan": {
         "category": "undetected"
       },
-      "CMC": {
+      "CTX": {
         "category": "undetected"
       },
       "CAT-QuickHeal": {
@@ -4590,6 +4590,9 @@
         "category": "undetected"
       },
       "Trustlook": {
+        "category": "undetected"
+      },
+      "Arcabit": {
         "category": "undetected"
       },
       "VirIT": {
@@ -4646,7 +4649,7 @@
       "McAfeeD": {
         "category": "undetected"
       },
-      "CTX": {
+      "CMC": {
         "category": "undetected"
       },
       "Sophos": {
@@ -4676,16 +4679,13 @@
       "Kingsoft": {
         "category": "undetected"
       },
-      "Microsoft": {
-        "category": "undetected"
-      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Arcabit": {
+      "Microsoft": {
         "category": "undetected"
       },
       "ViRobot": {
@@ -4754,7 +4754,7 @@
       "tehtris": {
         "category": "type-unsupported"
       },
-      "APEX": {
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Paloalto": {
@@ -4763,7 +4763,7 @@
       "Cynet": {
         "category": "type-unsupported"
       },
-      "Trapmine": {
+      "APEX": {
         "category": "type-unsupported"
       },
       "Cylance": {
