@@ -4542,9 +4542,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 62,
-    "total": 62,
-    "scanDate": "2026-09-30T15:58:00.000Z",
+    "undetected": 63,
+    "total": 63,
+    "scanDate": "2026-09-30T17:14:11.000Z",
     "permalink": "https://www.virustotal.com/gui/file/ae6bbffbf9f63be1328c0a7ee6f39859e0921e6d222a0a3b00ba4c97e290e883",
     "engines": {
       "Bkav": {
@@ -4571,10 +4571,13 @@
       "Malwarebytes": {
         "category": "undetected"
       },
+      "VIPRE": {
+        "category": "undetected"
+      },
       "Sangfor": {
         "category": "undetected"
       },
-      "Trustlook": {
+      "K7AntiVirus": {
         "category": "undetected"
       },
       "BitDefender": {
@@ -4583,7 +4586,7 @@
       "K7GW": {
         "category": "undetected"
       },
-      "K7AntiVirus": {
+      "Trustlook": {
         "category": "undetected"
       },
       "Arcabit": {
@@ -4634,7 +4637,7 @@
       "DrWeb": {
         "category": "undetected"
       },
-      "VIPRE": {
+      "Zillya": {
         "category": "undetected"
       },
       "TrendMicro": {
@@ -4745,13 +4748,10 @@
       "Acronis": {
         "category": "timeout"
       },
-      "Zillya": {
-        "category": "failure"
-      },
-      "DeepInstinct": {
+      "tehtris": {
         "category": "type-unsupported"
       },
-      "tehtris": {
+      "DeepInstinct": {
         "category": "type-unsupported"
       },
       "APEX": {
