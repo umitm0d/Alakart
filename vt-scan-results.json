@@ -4304,9 +4304,9 @@
     "malicious": 0,
     "suspicious": 0,
     "harmless": 0,
-    "undetected": 67,
-    "total": 67,
-    "scanDate": "2026-09-01T15:06:57.000Z",
+    "undetected": 66,
+    "total": 66,
+    "scanDate": "2026-10-01T05:28:54.000Z",
     "permalink": "https://www.virustotal.com/gui/file/5c7a5b7e2ba5ce207c09dc7c6605c256eaf5b4955e02c488ee5afebc05feb32a",
     "engines": {
       "Bkav": {
@@ -4325,9 +4325,6 @@
         "category": "undetected"
       },
       "CAT-QuickHeal": {
-        "category": "undetected"
-      },
-      "Skyhigh": {
         "category": "undetected"
       },
       "ALYac": {
@@ -4351,10 +4348,7 @@
       "K7GW": {
         "category": "undetected"
       },
-      "CrowdStrike": {
-        "category": "undetected"
-      },
-      "Arcabit": {
+      "Trustlook": {
         "category": "undetected"
       },
       "huorong": {
@@ -4390,13 +4384,10 @@
       "NANO-Antivirus": {
         "category": "undetected"
       },
-      "ViRobot": {
+      "SUPERAntiSpyware": {
         "category": "undetected"
       },
-      "Tencent": {
-        "category": "undetected"
-      },
-      "Trustlook": {
+      "Rising": {
         "category": "undetected"
       },
       "Emsisoft": {
@@ -4447,16 +4438,19 @@
       "Kingsoft": {
         "category": "undetected"
       },
+      "Microsoft": {
+        "category": "undetected"
+      },
       "Gridinsoft": {
         "category": "undetected"
       },
       "Xcitium": {
         "category": "undetected"
       },
-      "Microsoft": {
+      "Arcabit": {
         "category": "undetected"
       },
-      "SUPERAntiSpyware": {
+      "ViRobot": {
         "category": "undetected"
       },
       "ZoneAlarm": {
@@ -4486,7 +4480,7 @@
       "Zoner": {
         "category": "undetected"
       },
-      "Rising": {
+      "Tencent": {
         "category": "undetected"
       },
       "Yandex": {
@@ -4510,13 +4504,19 @@
       "Panda": {
         "category": "undetected"
       },
+      "CrowdStrike": {
+        "category": "undetected"
+      },
+      "Skyhigh": {
+        "category": "failure"
+      },
       "tehtris": {
         "category": "type-unsupported"
       },
       "DeepInstinct": {
         "category": "type-unsupported"
       },
-      "APEX": {
+      "Trapmine": {
         "category": "type-unsupported"
       },
       "Paloalto": {
@@ -4525,7 +4525,7 @@
       "Cynet": {
         "category": "type-unsupported"
       },
-      "Trapmine": {
+      "APEX": {
         "category": "type-unsupported"
       },
       "Cylance": {
