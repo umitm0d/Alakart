@@ -2872,23 +2872,23 @@
   },
   "13": {
     "error": "request to https://files.catbox.moe/wynqpu.apk?download=1 failed, reason: connect ECONNREFUSED 108.181.20.35:443",
-    "scanDate": "2026-10-03T20:58:42.849Z"
+    "scanDate": "2026-10-03T21:20:34.555Z"
   },
   "14": {
     "error": "request to https://files.catbox.moe/wwuceb.apk?download=1 failed, reason: connect ECONNREFUSED 108.181.20.35:443",
-    "scanDate": "2026-10-03T20:58:42.989Z"
+    "scanDate": "2026-10-03T21:20:34.909Z"
   },
   "15": {
     "error": "request to https://files.catbox.moe/rneru7.apk?download=1 failed, reason: connect ECONNREFUSED 108.181.20.35:443",
-    "scanDate": "2026-10-03T20:58:43.019Z"
+    "scanDate": "2026-10-03T21:20:34.972Z"
   },
   "16": {
     "error": "request to https://files.catbox.moe/lq3dw1.apk?download=1 failed, reason: connect ECONNREFUSED 108.181.20.35:443",
-    "scanDate": "2026-10-03T20:58:43.046Z"
+    "scanDate": "2026-10-03T21:20:35.037Z"
   },
   "17": {
     "error": "request to https://files.catbox.moe/j5m2hz.apk?download=1 failed, reason: connect ECONNREFUSED 108.181.20.35:443",
-    "scanDate": "2026-10-03T20:58:43.484Z"
+    "scanDate": "2026-10-03T21:20:35.102Z"
   },
   "18": {
     "malicious": 0,
