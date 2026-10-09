@@ -1,0 +1,550 @@
+name: build-and-deploy
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write        
+  id-token: write      
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+      - name: Logları gizle (maskele)
+        env:
+          FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
+          FORUM_PUSH_WORKER_URL: ${{ secrets.FORUM_PUSH_WORKER_URL }}
+          SOURCE_REPO: ${{ secrets.SOURCE_REPO }}
+        run: |
+          mask() { [ -n "$1" ] && echo "::add-mask::$1"; return 0; }
+          mask "$SOURCE_REPO"
+          mask "${SOURCE_REPO#*/}"
+          NAME="${GITHUB_REPOSITORY#*/}"
+          mask "$GITHUB_REPOSITORY"
+          mask "$GITHUB_REPOSITORY_OWNER"
+          mask "$NAME"
+          mask "${NAME}-source"
+          mask "${GITHUB_REPOSITORY_OWNER}/${NAME}-source"
+          for U in "$FIREBASE_DB_URL" "$FORUM_PUSH_WORKER_URL"; do
+            U="${U%/}"
+            mask "$U"
+            mask "${U#https://}"
+          done
+
+      - name: Private kaynak reposunu çek
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.SOURCE_REPO }}
+          token: ${{ secrets.PRIVATE_REPO_PAT }}
+
+      - name: Gerçek kaynak (private repo) commit SHA'sını yakala
+        id: source_sha
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Kaynak repo commit SHA: $SHA"
+
+      - name: Node.js kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Bağımlılıkları yükle
+        run: |
+          npm ci
+          if ! npm ls --production=false --depth=0 > /tmp/npm-ls-output.txt 2>&1; then
+            echo "::warning::npm ci sonrası node_modules eksik/tutarsız görünüyor, cache bypass edilip temiz kurulum deneniyor..."
+            cat /tmp/npm-ls-output.txt
+            rm -rf node_modules
+            npm ci --prefer-offline=false --no-cache
+            npm ls --production=false --depth=0
+          fi
+          echo "✅ Bağımlılıklar doğrulandı."
+
+      - name: Teaser video linkini kaynağa enjekte et (build öncesi)
+        env:
+          TEASER_VIDEO_URL: ${{ secrets.TEASER_VIDEO_URL }}
+        run: |
+          if [ -z "$TEASER_VIDEO_URL" ]; then
+            echo "::error::TEASER_VIDEO_URL secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin."
+            exit 1
+          fi
+          if [ ! -f "source/Umitm0dstore.html" ]; then
+            echo "::error::source/Umitm0dstore.html bulunamadı."
+            exit 1
+          fi
+          if ! grep -q "__TEASER_VIDEO_URL__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __TEASER_VIDEO_URL__ source/Umitm0dstore.html içinde bulunamadı. Kaynak dosya beklenenden farklı olabilir."
+            exit 1
+          fi
+          python3 - "$TEASER_VIDEO_URL" << 'EOF'
+          import sys, io
+          url = sys.argv[1]
+          path = "source/Umitm0dstore.html"
+          with io.open(path, "r", encoding="utf-8") as f:
+              html = f.read()
+          html = html.replace("__TEASER_VIDEO_URL__", url)
+          with io.open(path, "w", encoding="utf-8") as f:
+              f.write(html)
+          EOF
+          echo "✅ Teaser video linki source/Umitm0dstore.html içine enjekte edildi (build henüz çalışmadı, bu dosya commit edilmeyecek)."
+
+      - name: Cloudinary bilgilerini kaynağa enjekte et (build öncesi)
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_UPLOAD_PRESET: ${{ secrets.CLOUDINARY_UPLOAD_PRESET }}
+        run: |
+          if [ -z "$CLOUDINARY_CLOUD_NAME" ]; then
+            echo "::error::CLOUDINARY_CLOUD_NAME secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin."
+            exit 1
+          fi
+          if [ -z "$CLOUDINARY_UPLOAD_PRESET" ]; then
+            echo "::error::CLOUDINARY_UPLOAD_PRESET secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin."
+            exit 1
+          fi
+          if ! grep -q "__CLOUDINARY_CLOUD_NAME__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __CLOUDINARY_CLOUD_NAME__ source/Umitm0dstore.html içinde bulunamadı."
+            exit 1
+          fi
+          if ! grep -q "__CLOUDINARY_UPLOAD_PRESET__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __CLOUDINARY_UPLOAD_PRESET__ source/Umitm0dstore.html içinde bulunamadı."
+            exit 1
+          fi
+          python3 - "$CLOUDINARY_CLOUD_NAME" "$CLOUDINARY_UPLOAD_PRESET" << 'EOF'
+          import sys, io
+          cloud_name = sys.argv[1]
+          upload_preset = sys.argv[2]
+          path = "source/Umitm0dstore.html"
+          with io.open(path, "r", encoding="utf-8") as f:
+              html = f.read()
+          html = html.replace("__CLOUDINARY_CLOUD_NAME__", cloud_name)
+          html = html.replace("__CLOUDINARY_UPLOAD_PRESET__", upload_preset)
+          with io.open(path, "w", encoding="utf-8") as f:
+              f.write(html)
+          EOF
+          echo "✅ Cloudinary bilgileri source/Umitm0dstore.html içine enjekte edildi."
+
+      - name: Forum push worker adresini kaynağa enjekte et (build öncesi)
+        env:
+          FORUM_PUSH_WORKER_URL: ${{ secrets.FORUM_PUSH_WORKER_URL }}
+        run: |
+          if [ -z "$FORUM_PUSH_WORKER_URL" ]; then
+            echo "::error::FORUM_PUSH_WORKER_URL secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin."
+            exit 1
+          fi
+          if ! grep -q "__FORUM_PUSH_WORKER_URL__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __FORUM_PUSH_WORKER_URL__ source/Umitm0dstore.html içinde bulunamadı."
+            exit 1
+          fi
+          python3 - "$FORUM_PUSH_WORKER_URL" << 'EOF'
+          import sys, io
+          url = sys.argv[1]
+          path = "source/Umitm0dstore.html"
+          with io.open(path, "r", encoding="utf-8") as f:
+              html = f.read()
+          html = html.replace("__FORUM_PUSH_WORKER_URL__", url)
+          with io.open(path, "w", encoding="utf-8") as f:
+              f.write(html)
+          EOF
+          echo "✅ FORUM_PUSH_WORKER_URL source/Umitm0dstore.html içine enjekte edildi."
+
+      - name: Uygulama sürümünü kaynağa enjekte et (build öncesi)
+        run: |
+          if ! grep -q "__APP_BUILD_VERSION__" source/Umitm0dstore.html; then
+            echo "::error::Placeholder __APP_BUILD_VERSION__ source/Umitm0dstore.html içinde bulunamadı."
+            exit 1
+          fi
+          sed -i "s/__APP_BUILD_VERSION__/${SOURCE_SHA}/g" source/Umitm0dstore.html
+          echo "✅ Uygulama sürümü (${SOURCE_SHA}) source/Umitm0dstore.html içine enjekte edildi."
+        env:
+          SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
+
+      - name: Obfuscate + minify çalıştır
+        run: npm run build
+
+      - name: Statik dosyaları (manifest.json, sw.js) dist'e kopyala
+        run: |
+          if [ ! -f "manifest.json" ]; then
+            echo "::error::manifest.json repo kökünde bulunamadı."
+            exit 1
+          fi
+          if [ ! -f "source/sw.js" ]; then
+            echo "::error::source/sw.js bulunamadı."
+            exit 1
+          fi
+          cp manifest.json dist/manifest.json
+          cp source/sw.js dist/sw.js
+          echo "✅ manifest.json ve sw.js (source/sw.js'den) dist/ içine kopyalandı"
+
+          if [ ! -f "source/kapali.html" ]; then
+            echo "::error::source/kapali.html bulunamadı (eski adreste gösterilecek kapanış sayfası)."
+            exit 1
+          fi
+          cp source/kapali.html dist/UmitStoreForum.html
+          echo "✅ Eski adres için kapanış sayfası dist/UmitStoreForum.html olarak eklendi"
+
+      - name: Önceki VT tarama sonuçlarını önbellekten geri yükle
+        uses: actions/cache@v4
+        with:
+          path: vt-scan-internal-cache.json
+          key: vt-scan-internal-cache-v1
+
+      - name: APK'ları VirusTotal ile tara (id+hash bazlı, sadece yeni/değişen dosyalar)
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        run: |
+          if [ -z "$VT_API_KEY" ]; then
+            echo "::error::VT_API_KEY secret'ı tanımlı değil. Repo Settings > Secrets and variables > Actions kısmından ekleyin (virustotal.com üzerinden ücretsiz API anahtarı alınabilir). Birden fazla (yedek) anahtar eklemek için değerleri virgülle ayırarak girin: anahtar1,anahtar2"
+            exit 1
+          fi
+          APPS_JSON_FILE=source/umitm0d.json VT_INTERNAL_CACHE_FILE=vt-scan-internal-cache.json node vt-scan-apks.js
+          echo "✅ VirusTotal taraması tamamlandı, sonuçlar vt-scan-results.json içine yazıldı (appUrl/appVersion hariç, sadece internal cache'te)."
+
+      - name: vt-scan-results.json'u public repoya push et
+        env:
+          DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+        run: |
+          if [ ! -f "vt-scan-results.json" ]; then
+            echo "::warning::vt-scan-results.json bulunamadı (VT taraması hiç çalışmamış olabilir), push atlandı."
+            exit 0
+          fi
+          git clone --depth 1 "https://x-access-token:${DISPATCH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" alakart-public >/dev/null 2>&1 || {
+            echo "::warning::Public repo klonlanamadı (DISPATCH_TOKEN izinlerini kontrol edin), push atlandı.";
+            exit 0;
+          }
+          cp vt-scan-results.json alakart-public/vt-scan-results.json
+          cd alakart-public
+          git config user.name "umitm0d-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet -- vt-scan-results.json; then
+            echo "ℹ️ vt-scan-results.json değişmemiş, push atlandı."
+          else
+            git add vt-scan-results.json
+            if git log -1 --pretty=%an | grep -q "umitm0d-bot"; then
+              git commit --amend --no-edit --date="$(date -u +%Y-%m-%dT%H:%M:%S)"
+              git push --force origin HEAD:main || echo "::warning::vt-scan-results.json push edilemedi (DISPATCH_TOKEN izinlerini kontrol edin)."
+            else
+              git commit -m "VT tarama sonuçlarını güncelle (otomatik)"
+              git push origin HEAD:main || echo "::warning::vt-scan-results.json push edilemedi (DISPATCH_TOKEN izinlerini kontrol edin)."
+            fi
+            echo "✅ vt-scan-results.json public repoya push edildi."
+          fi
+
+      - name: version.json oluştur
+        run: |
+          echo "{\"version\":\"${SOURCE_SHA}\",\"builtAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > dist/version.json
+          echo "✅ dist/version.json oluşturuldu"
+        env:
+          SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
+
+      - name: Enjeksiyonun build çıktısına geçtiğini doğrula
+        run: |
+          if grep -q "__TEASER_VIDEO_URL__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (TEASER_VIDEO_URL)! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          if grep -q "__CLOUDINARY_CLOUD_NAME__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (CLOUDINARY_CLOUD_NAME)! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          if grep -q "__CLOUDINARY_UPLOAD_PRESET__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (CLOUDINARY_UPLOAD_PRESET)! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          if grep -q "__APP_BUILD_VERSION__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (APP_BUILD_VERSION)! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          if grep -q "__FORUM_PUSH_WORKER_URL__" dist/Umitm0dPremiumApp.html; then
+            echo "::error::Placeholder hâlâ dist/Umitm0dPremiumApp.html içinde (FORUM_PUSH_WORKER_URL)! Enjeksiyon başarısız olmuş olabilir."
+            exit 1
+          fi
+          echo "✅ Doğrulandı: dist/Umitm0dPremiumApp.html içinde placeholder kalmamış."
+
+      - name: Çıktıların obfuscate edildiğini doğrula
+        run: |
+          for f in dist/Umitm0dPremiumApp.html dist/Umitm0dTam1Ka.html; do
+            [ -f "$f" ] || { echo "::error::$f yok"; exit 1; }
+            grep -q "_0x" "$f" || { echo "::error::$f obfuscate edilmemiş görünüyor"; exit 1; }
+          done
+
+      - name: Pages artifact'ini hazırla
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: GitHub Pages'e deploy et
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Firebase servis hesabından access token üret
+        id: gcp_auth
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          pip install --quiet google-auth
+          python3 - << 'EOF'
+          import os, json
+          from google.oauth2 import service_account
+          from google.auth.transport.requests import Request
+
+          raw = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON', '')
+          token = ''
+          if raw.strip():
+              try:
+                  info = json.loads(raw)
+                  creds = service_account.Credentials.from_service_account_info(
+                      info,
+                      scopes=[
+                          'https://www.googleapis.com/auth/firebase.database',
+                          'https://www.googleapis.com/auth/userinfo.email',
+                      ],
+                  )
+                  creds.refresh(Request())
+                  token = creds.token or ''
+              except Exception as e:
+                  print('::warning::Access token üretilemedi: ' + str(e))
+          else:
+              print('::warning::FIREBASE_SERVICE_ACCOUNT_JSON secret\'ı tanımlı değil.')
+
+          if token:
+              print('::add-mask::' + token)
+
+          gh_output = os.environ.get('GITHUB_OUTPUT')
+          with open(gh_output, 'a') as f:
+              f.write('access_token=' + token + '\n')
+          EOF
+
+      - name: Firebase RTDB'ye sürüm bildir (anlık güncelleme push'u, deploy SONRASI)
+        env:
+          ACCESS_TOKEN: ${{ steps.gcp_auth.outputs.access_token }}
+          SOURCE_SHA: ${{ steps.source_sha.outputs.sha }}
+          FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
+        run: |
+          if [ -z "$FIREBASE_DB_URL" ]; then
+            echo "::warning::FIREBASE_DB_URL secret'ı tanımlı değil, anlık güncelleme push'u atlandı."
+            exit 0
+          fi
+          FIREBASE_DB_URL="${FIREBASE_DB_URL%/}"
+          echo "CDN'in tam yayılması için 15 sn bekleniyor..."
+          sleep 15
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "::warning::Google Cloud access token alınamadı (FIREBASE_SERVICE_ACCOUNT_JSON secret'ı eksik/geçersiz olabilir), anlık güncelleme push'u atlandı. Eklemek için: Firebase Console > Project Settings > Service accounts > Generate new private key, sonra repo Settings > Secrets and variables > Actions > FIREBASE_SERVICE_ACCOUNT_JSON."
+            exit 0
+          fi
+          HTTP_CODE=$(curl -s -o /tmp/firebase_response.json -w "%{http_code}" -X PUT \
+            "${FIREBASE_DB_URL}/system/appVersion.json" \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            -d "{\"version\":\"${SOURCE_SHA}\",\"ts\":$(date +%s)000}")
+          cat /tmp/firebase_response.json
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::warning::Firebase RTDB'ye sürüm yazılamadı (HTTP ${HTTP_CODE}). Client'lar en kötü ihtimalle bir sonraki version.json polling turunda güncellenir."
+            exit 0
+          fi
+          echo "✅ Firebase system/appVersion güncellendi (${SOURCE_SHA}) — deploy zaten tamamlandı, site canlı."
+
+      - name: Yeni eklenen modlar için push bildirimi gönder (broadcastFeed üzerinden)
+        env:
+          ACCESS_TOKEN: ${{ steps.gcp_auth.outputs.access_token }}
+          FORUM_PUSH_WORKER_URL: ${{ secrets.FORUM_PUSH_WORKER_URL }}
+          FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
+        run: |
+          if [ -z "$FIREBASE_DB_URL" ]; then
+            echo "::warning::FIREBASE_DB_URL tanımlı değil, yeni mod bildirimi atlandı."
+            exit 0
+          fi
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "::warning::Access token yok, yeni mod bildirimi atlandı."
+            exit 0
+          fi
+          if [ -z "$FORUM_PUSH_WORKER_URL" ]; then
+            echo "::warning::FORUM_PUSH_WORKER_URL tanımlı değil, yeni mod bildirimi atlandı."
+            exit 0
+          fi
+          python3 - << 'EOF'
+          import os, json, time, urllib.request
+
+          ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN', '')
+          WORKER_URL = os.environ.get('FORUM_PUSH_WORKER_URL', '')
+          SITE_ORIGIN = 'https://' + os.environ.get('GITHUB_REPOSITORY_OWNER', '') + '.github.io'
+          DB_BASE = os.environ.get('FIREBASE_DB_URL', '').rstrip('/')
+
+          def rtdb_get(path):
+              req = urllib.request.Request(DB_BASE + path + '.json',
+                                            headers={'Authorization': 'Bearer ' + ACCESS_TOKEN})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      data = r.read()
+                      return json.loads(data) if data and data != b'null' else None
+              except Exception as e:
+                  print('RTDB GET hata (' + path + '):', e)
+                  return None
+
+          def rtdb_put(path, payload):
+              body = json.dumps(payload).encode('utf-8')
+              req = urllib.request.Request(DB_BASE + path + '.json', data=body, method='PUT',
+                                            headers={'Authorization': 'Bearer ' + ACCESS_TOKEN,
+                                                     'Content-Type': 'application/json'})
+              with urllib.request.urlopen(req) as r:
+                  return r.read()
+
+          def rtdb_post(path, payload):
+              body = json.dumps(payload).encode('utf-8')
+              req = urllib.request.Request(DB_BASE + path + '.json', data=body, method='POST',
+                                            headers={'Authorization': 'Bearer ' + ACCESS_TOKEN,
+                                                     'Content-Type': 'application/json'})
+              with urllib.request.urlopen(req) as r:
+                  return json.loads(r.read())
+
+          def as_dict(value):
+              if value is None:
+                  return {}
+              if isinstance(value, dict):
+                  return value
+              if isinstance(value, list):
+                  return {str(i): v for i, v in enumerate(value) if v is not None}
+              return {}
+
+          try:
+              with open('source/umitm0d.json', 'r', encoding='utf-8') as f:
+                  apps = json.load(f)
+          except Exception as e:
+              print('source/umitm0d.json okunamadı:', e)
+              apps = []
+
+          candidate_apps = [a for a in apps if a.get('id')]
+          if not candidate_apps:
+              print('JSON içinde id\'li mod yok, bildirim atlanıyor.')
+          else:
+              already = as_dict(rtdb_get('/notifiedNewApps'))
+
+              missing_ids = [str(a['id']) for a in candidate_apps if str(a['id']) not in already]
+              if missing_ids:
+                  print('ℹ️ İlk kez görülen (kaydı olmayan) id\'ler bildirim atılmadan kaydediliyor: ' + ', '.join(missing_ids))
+                  for app in candidate_apps:
+                      app_id = str(app['id'])
+                      if app_id not in missing_ids:
+                          continue
+                      app_timestamp = str(app.get('timestamp') or '')
+                      try:
+                          rtdb_put('/notifiedNewApps/' + app_id, {
+                              'timestamp': app_timestamp,
+                              'notifiedAt': int(time.time() * 1000),
+                              'backfilled': True
+                          })
+                      except Exception as e:
+                          print('notifiedNewApps backfill yazılamadı (' + app_id + '):', e)
+                  already = as_dict(rtdb_get('/notifiedNewApps'))
+
+              for app in candidate_apps:
+                  app_id = str(app['id'])
+                  app_timestamp = str(app.get('timestamp') or '')
+
+                  prev = already.get(app_id)
+                  if prev is not None:
+                      if isinstance(prev, dict):
+                          prev_timestamp = str(prev.get('timestamp') or '')
+                      else:
+                          prev_timestamp = None
+
+                      if prev_timestamp is None:
+                          continue
+                      if not app_timestamp or app_timestamp == prev_timestamp:
+                          continue
+                      print('🔄 Mod güncellenmiş (timestamp değişti), yeniden bildirim gönderiliyor: ' + app_id)
+                  else:
+                      print('🆕 Daha önce görülmemiş id, bildirim gönderiliyor: ' + app_id)
+
+                  name = app.get('name', 'Yeni Mod')
+                  broadcast = {
+                      'title': 'Yeni Mod Eklendi',
+                      'message': name,
+                      'uid': None,
+                      'ts': int(time.time() * 1000)
+                  }
+                  try:
+                      res = rtdb_post('/broadcasts', broadcast)
+                  except Exception as e:
+                      print('broadcasts yazılamadı (' + app_id + '):', e)
+                      continue
+                  push_key = res.get('name') if isinstance(res, dict) else None
+                  if not push_key:
+                      print('broadcasts push key alınamadı:', app_id)
+                      continue
+                  worker_body = json.dumps({'feedType': 'broadcastFeed', 'feedId': push_key}).encode('utf-8')
+                  wreq = urllib.request.Request(WORKER_URL, data=worker_body, method='POST',
+                                                 headers={'Content-Type': 'application/json',
+                                                          'Origin': SITE_ORIGIN,
+                                                          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                                                          'Accept': 'application/json',
+                                                          'Referer': SITE_ORIGIN + '/'})
+                  try:
+                      with urllib.request.urlopen(wreq) as wr:
+                          print('Worker yanıtı (' + app_id + '):', wr.status)
+                  except urllib.error.HTTPError as e:
+                      body = ''
+                      try:
+                          body = e.read().decode('utf-8', errors='replace')
+                      except Exception:
+                          pass
+                      print('Worker çağrısı hata (' + app_id + '):', e.code, e.reason)
+                      print('Worker hata gövdesi (' + app_id + '):', body)
+                      print('Worker hata header\'ları (' + app_id + '):', dict(e.headers) if e.headers else {})
+                      continue
+                  except Exception as e:
+                      print('Worker çağrısı hata (' + app_id + '):', e)
+                      continue
+                  try:
+                      rtdb_put('/notifiedNewApps/' + app_id, {
+                          'timestamp': app_timestamp,
+                          'notifiedAt': int(time.time() * 1000)
+                      })
+                  except Exception as e:
+                      print('notifiedNewApps yazılamadı (' + app_id + '):', e)
+                  print('✅ Yeni mod bildirimi gönderildi: ' + name)
+          EOF
+
+  temizle:
+    needs: build-and-deploy
+    if: ${{ always() && needs.build-and-deploy.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+      deployments: write
+    steps:
+      - name: Bekle
+        run: sleep 60
+
+      - name: Pages deployment kayıtlarını sil (paralel)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/deployments?per_page=100" --paginate -q '.[].id' > /tmp/deps.txt
+          echo "Silinecek deployment sayısı: $(wc -l < /tmp/deps.txt)"
+          export GITHUB_REPOSITORY
+          xargs -a /tmp/deps.txt -P 10 -I{} sh -c '
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/deployments/{}" >/dev/null 2>&1 || {
+              gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/{}/statuses" -f state=inactive >/dev/null 2>&1
+              gh api -X DELETE "repos/$GITHUB_REPOSITORY/deployments/{}" >/dev/null 2>&1
+            }' || true
+
+      - name: Eski workflow run kayıtlarını sil (paralel)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run list --repo "$GITHUB_REPOSITORY" --limit 1000 --json databaseId -q '.[].databaseId' | grep -vx "$GITHUB_RUN_ID" > /tmp/runs.txt || true
+          export GITHUB_REPOSITORY
+          xargs -a /tmp/runs.txt -P 10 -I{} sh -c 'gh run delete {} --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1' || true
