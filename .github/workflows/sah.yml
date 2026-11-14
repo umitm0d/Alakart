@@ -1,0 +1,37 @@
+name: reset-history
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Geçmişi sıfırla (tek commit)
+        env:
+          TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+        run: |
+          git config user.name "umitm0d-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout --orphan temiz
+          git add -A
+          git commit -m "init"
+          git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" temiz:main
+
+      - name: Eski workflow run kayıtlarını sil
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run list --repo "$GITHUB_REPOSITORY" --limit 1000 --json databaseId -q '.[].databaseId' | while read id; do
+            [ "$id" = "$GITHUB_RUN_ID" ] && continue
+            gh run delete "$id" --repo "$GITHUB_REPOSITORY" || true
+          done

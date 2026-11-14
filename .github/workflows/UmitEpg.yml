@@ -1,0 +1,39 @@
+name: Günlük EPG Güncelleme
+
+on:
+  schedule:
+    - cron: "0 3 * * *"  # Her gün sabah 03:00'te çalışır (UTC)
+  workflow_dispatch:      # Manuel çalıştırma imkanı da sağlar
+
+jobs:
+  update-epg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧩 Repo'yu Klonla
+        uses: actions/checkout@v4
+
+      - name: 🐍 Python Kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Gerekli Paketleri Kur
+        run: |
+          pip install -r requirements.txt
+
+      - name: 🔐 Ortam Değişkenlerini Ayarla
+        env:
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+          DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+          DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+        run: |
+          echo "Ortam değişkenleri ayarlandı."
+
+      - name: 🚀 Script'i Çalıştır
+        env:
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+          DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+          DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+        run: |
+          python main.py
